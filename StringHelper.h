@@ -17,7 +17,8 @@
 #include <QPair>
 #include <QString>
 #include <QStringList>
-#include <QStringView>
+
+
 
 // Class definition
 class StringHelper :

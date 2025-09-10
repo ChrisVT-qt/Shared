@@ -1,4 +1,4 @@
-// SimpleTelegramBot - a software organizing everyday tasks
+// Shared classes across my projects
 // Copyright (C) 2025 Chris von Toerne
 //
 // This program is free software: you can redistribute it and/or modify
@@ -1419,7 +1419,7 @@ qint64 StringHelper::ConvertToMilliSeconds(const QString & mcrTime)
         }
     }
 
-    const qint64 time_ms = ((h * 60 + m) * 60 + s) * 1000 + z;
+    const qint64 time_ms = sign * (((h * 60 + m) * 60 + s) * 1000 + z);
 
     CALL_OUT("");
     return time_ms;
