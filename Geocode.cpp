@@ -4,7 +4,7 @@
 // Project includes
 #include "CallTracer.h"
 #include "Geocode.h"
-#include "GoogleSecrets.h"
+#include "secrets/GoogleSecrets.h"
 #include "MessageLogger.h"
 #include "Preferences.h"
 

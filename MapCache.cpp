@@ -3,7 +3,7 @@
 
 // Project includes
 #include "CallTracer.h"
-#include "GoogleSecrets.h"
+#include "secrets/GoogleSecrets.h"
 #include "MessageLogger.h"
 #include "Map.h"
 #include "MapCache.h"
