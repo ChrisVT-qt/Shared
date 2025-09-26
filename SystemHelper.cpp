@@ -23,8 +23,10 @@
 #include "CallTracer.h"
 
 // Qt includes
-#include <QPalette>
 #include <QDebug>
+#include <QFileInfo>
+#include <QMimeDatabase>
+#include <QPalette>
 
 // Platform-specific includes: Apple
 #if defined(__APPLE__)
@@ -65,6 +67,32 @@ SystemHelper::~SystemHelper()
     
 
 // ================================================================== Functions
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Determine file MIME type
+QString SystemHelper::GetMIMEType(const QString & mcrFilename)
+{
+    CALL_IN(QString("mcrFilename=%1")
+        .arg(CALL_SHOW(mcrFilename)));
+
+    QFileInfo file_info(mcrFilename);
+
+    QMimeDatabase mime_database;
+    const QMimeType mime_type = mime_database.mimeTypeForFile(file_info);
+    if (mime_type.isValid())
+    {
+        CALL_OUT("");
+        return mime_type.name();
+    } else
+    {
+        // No MIME type
+        return QString();
+    }
+
+    // We never get here
+}
 
 
 

@@ -53,6 +53,7 @@ void PixmapWidget::SetPixmap(const QPixmap & mcrPixmap)
         .arg(CALL_SHOW(mcrPixmap)));
 
     m_Pixmap = mcrPixmap;
+    update();
 
     CALL_OUT("");
 }

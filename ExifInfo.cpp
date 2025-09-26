@@ -1907,6 +1907,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 11 Pro Max"] = "iPhone 11 Pro Max";
     m_CameraModelMapper["Apple.iPhone 12"] = "iPhone 12";
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
+    m_CameraModelMapper["Apple.iPhone 15 Pro Max"] = "iPhone 15 Pro Max";
     m_CameraModelMapper["Apple.iPhone 16e"] = "iPhone 16e";
     m_CameraModelMapper["Apple.iPhone SE (2nd generation)"] = "iPhone SE 2";
     m_CameraModelMapper["Apple.iPhone SE (3rd generation)"] = "iPhone SE 3";
@@ -2255,8 +2256,11 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Minolta.DiMAGE X"] = "DiMAGE X";
 
     // Motorola
+    m_CameraModelMapper["Motorola.moto g stylus 5G"] = "Moto G Stylus 5G";
     m_CameraModelMapper["Motorola.Nexus 6"] = "Nexus 6";
+    m_CameraModelMapper["Motorola.XT1080"] = "DROID Ultra";
     m_CameraModelMapper["Motorola.XT1254"] = "DROID Turbo";
+    m_CameraModelMapper["Motorola.XT1585"] = "DROID Turbo 2";
 
     // Nikon
     m_CameraModelMapper["Nikon.NIKON D2X"] = "D2X";
@@ -2528,7 +2532,9 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Toshiba.PDRM5"] = "PDR-M5";
 
     // Xiaomi
+    m_CameraModelMapper["Xiaomi.2312DRA50G"] = "Redmi Note 13 Pro 5G";
     m_CameraModelMapper["Xiaomi.Redmi Note 8 Pro"] = "Redmi Note 8 Pro";
+    m_CameraModelMapper["Xiaomi.Redmi Note 8T"] = "Redmi Note 8T";
 
     // ZTE
     m_CameraModelMapper["ZTE.Z959"] = "Grand X3 Z959";
@@ -2630,6 +2636,9 @@ void ExifInfo::Init_LensModelMapper()
         "Apple iPhone 12 Front Camera 2.71mm f/2.2";
     m_LensModelMapper["Apple.iPhone 12 Pro Max back camera 5.1mm f/1.6"] =
         "Apple iPhone 12 Pro Max Back Camera 5.1mm f/1.6";
+    m_LensModelMapper["Apple.iPhone 15 Pro Max back triple camera 6.765mm "
+        "f/1.78"] =
+        "Apple iPhone 15 Pro Max back triple camera 6.765mm f/1.78";
     m_LensModelMapper["Apple.iPhone 16e back camera 4.2mm f/1.64"] =
         "Apple iPhone 16e Back Camera 4.2mm f/1.64";
     m_LensModelMapper["Apple.iPhone 16e front camera 2.69mm f/1.9"] =
@@ -2845,7 +2854,10 @@ void ExifInfo::Init_FStopMapper()
     m_FStopMapper["41/25"] = "1.6";
 
     m_FStopMapper["150/100"] = "1.5";
+
+    m_FStopMapper["165/100"] = "1.7";
     m_FStopMapper["170/100"] = "1.7";
+    m_FStopMapper["179/100"] = "1.8";
     m_FStopMapper["180/100"] = "1.8";
     m_FStopMapper["185/100"] = "1.9";
     m_FStopMapper["189/100"] = "1.9";
@@ -2891,6 +2903,9 @@ void ExifInfo::Init_FStopMapper()
     m_FStopMapper["24000/10000"] = "2.4";
 
     m_FStopMapper["200000/100000"] = "2";
+    m_FStopMapper["240000/100000"] = "2.4";
+
+    m_FStopMapper["1244236/699009"] = "1.8";
 
     m_FStopMapper["2000000/1000000"] = "2";
     m_FStopMapper["4400000/1000000"] = "4.4";
@@ -3042,6 +3057,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["431/100"] = "4.3";
     m_FocalLengthMapper["442/100"] = "4.4";
     m_FocalLengthMapper["460/100"] = "4.6";
+    m_FocalLengthMapper["467/100"] = "4.7";
     m_FocalLengthMapper["480/100"] = "4.8";
     m_FocalLengthMapper["490/100"] = "4.9";
     m_FocalLengthMapper["500/100"] = "5";
@@ -3104,8 +3120,11 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["4000/1000"] = "4";
     m_FocalLengthMapper["4300/1000"] = "4.3";
     m_FocalLengthMapper["4442/1000"] = "4.4";
+    m_FocalLengthMapper["4499/1000"] = "4.5";
     m_FocalLengthMapper["4500/1000"] = "4.5";
     m_FocalLengthMapper["4600/1000"] = "4.6";
+    m_FocalLengthMapper["4710/1000"] = "4.7";
+    m_FocalLengthMapper["4740/1000"] = "4.7";
     m_FocalLengthMapper["5000/1000"] = "5";
     m_FocalLengthMapper["5400/1000"] = "5.4";
     m_FocalLengthMapper["5583/1000"] = "5.6";
@@ -3116,6 +3135,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["5989/1000"] = "6";
     m_FocalLengthMapper["6000/1000"] = "6";
     m_FocalLengthMapper["6100/1000"] = "6.1";
+    m_FocalLengthMapper["6190/1000"] = "6.2";
     m_FocalLengthMapper["6200/1000"] = "6.2";
     m_FocalLengthMapper["6300/1000"] = "6.3";
     m_FocalLengthMapper["6447/1000"] = "6.4";
@@ -3146,9 +3166,11 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["50000/1000"] = "50";
     m_FocalLengthMapper["72000/1000"] = "72";
 
-    m_FocalLengthMapper["469865/174671"] = "2.7";
+    m_FocalLengthMapper["251773/37217"] = "6.7";
 
     m_FocalLengthMapper["2497280/65536"] = "38.1";
+
+    m_FocalLengthMapper["469865/174671"] = "2.7";
 
     m_FocalLengthMapper["3302983/524283"] = "6.3";
 
@@ -3247,8 +3269,12 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["360/9450"] = "1/26";
     m_ExposureTimeMapper["400/10000"] = "1/25";
     m_ExposureTimeMapper["403/10"] = "40";
+    m_ExposureTimeMapper["416/10000"] = "1/24";
+    m_ExposureTimeMapper["833/100000"] = "1/120";
+    m_ExposureTimeMapper["866/100000"] = "1/115";
 
     m_ExposureTimeMapper["1008/1000000"] = "1/1000";
+    m_ExposureTimeMapper["1250/10000"] = "1/8";
     m_ExposureTimeMapper["1666/100000"] = "1/60";
     m_ExposureTimeMapper["2499/100000"] = "1/40";
     m_ExposureTimeMapper["3125/1000000"] = "1/300";
@@ -3283,15 +3309,19 @@ void ExifInfo::Init_ExposureTimeMapper()
 
     m_ExposureTimeMapper["100000/1000000"] = "1/10";
 
+    m_ExposureTimeMapper["1666667/100000000"] = "1/60";
     m_ExposureTimeMapper["639132/19173959"] = "1/30";
 
     m_ExposureTimeMapper["8947849/536870912"] = "1/60";
+
+    m_ExposureTimeMapper["16666667/1000000000"] = "1/60";
     m_ExposureTimeMapper["134217728/536870912"] = "1/4";
 
     m_ExposureTimeMapper["6604300/1000000000"] = "1/151";
     m_ExposureTimeMapper["7845866/1000000000"] = "1/127";
     m_ExposureTimeMapper["8315366/1000000000"] = "1/120";
     m_ExposureTimeMapper["29997000/1000000000"] = "1/33";
+    m_ExposureTimeMapper["40004000/1000000000"] = "1/25";
 
     m_ExposureTimeMapper["3435973/4294967295"] = "1/1250";
     m_ExposureTimeMapper["10737417/4294967295"] = "1/400";
