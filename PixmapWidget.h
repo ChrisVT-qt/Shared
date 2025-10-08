@@ -30,6 +30,7 @@ public:
 public:
     // Set pixmap
     void SetPixmap(const QPixmap & mcrPixmap);
+    QPixmap GetPixmap();
 private:
     QPixmap m_Pixmap;
 

@@ -255,8 +255,8 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     {
         const QSize size =
             media_metadata.value(QMediaMetaData::Resolution).toSize();
-        metadata[Metadata_VideoWidth] = QString::number(size.width());
-        metadata[Metadata_VideoHeight] = QString::number(size.height());
+        metadata[Metadata_Width] = QString::number(size.width());
+        metadata[Metadata_Height] = QString::number(size.height());
     }
 
     // Audio bitrate
@@ -471,3 +471,4 @@ QPixmap MediaHelper::GetCoverArt(const QString & mcrFilename)
     CALL_OUT("");
     return cover_art;
 }
+

@@ -48,6 +48,7 @@ public:
         Metadata_FileFormat,
         Metadata_FileSize,
         Metadata_Genres,
+        Metadata_Height,
         Metadata_Language,
         Metadata_LocalDirectory,
         Metadata_LocalFilename,
@@ -59,8 +60,7 @@ public:
         Metadata_VideoCodec,
         Metadata_VideoCodecLong,
         Metadata_VideoFrameRate,
-        Metadata_VideoHeight,
-        Metadata_VideoWidth
+        Metadata_Width
     };
     static QHash < Metadata, QString > GetMediaMetadata(
         const QString & mcrFilename);

@@ -87,6 +87,12 @@ public:
     static bool LessThan_IntDate(const QPair < int, QString > mcLeft,
         const QPair < int, QString > mcRight);
 
+    // Case-insensitive string comparoson
+    static bool LessThan_CaseInsensitive(const QString mcLeft,
+        const QString mcRight);
+    static bool GreaterThan_CaseInsensitive(const QString mcLeft,
+        const QString mcRight);
+
     // Compare Strings with natural order
     static bool LessThan_Natural(const QString mcLeft,
         const QString mcRight);

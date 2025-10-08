@@ -192,8 +192,14 @@ bool SystemHelper::IsDarkMode()
     CALL_IN("");
 
 #if defined(__APPLE__)
-    // Use windown base color to tell
-    const QColor system_light_bg(0xec, 0xec, 0xec);
+    // Use window base color to tell
+
+    // Older pre-macOS 26 (Tahoe)
+    // const QColor system_light_bg(0xec, 0xec, 0xec);
+
+    // macoOS 26 (Tahoe) with Liquid Glass
+    const QColor system_light_bg(0xff, 0xff, 0xff);
+
     const QColor system_current_bg(QPalette().color(QPalette::Window));
 
     // Will not change while application is running

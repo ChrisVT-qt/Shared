@@ -3196,6 +3196,7 @@ void ExifInfo::Init_ExposureTimeMapper()
 
     // Note that exposure times of the format "1/n" are handled separately.
 
+    m_ExposureTimeMapper["2/1"] = "2";
     m_ExposureTimeMapper["2/39"] = "1/20";
     m_ExposureTimeMapper["3/10"] = "0.3";
     m_ExposureTimeMapper["4/10"] = "0.4";

@@ -61,6 +61,18 @@ void PixmapWidget::SetPixmap(const QPixmap & mcrPixmap)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Set pixmap
+QPixmap PixmapWidget::GetPixmap()
+{
+    CALL_IN("");
+
+    CALL_OUT("");
+    return m_Pixmap;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Paint event
 void PixmapWidget::paintEvent(QPaintEvent * mpEvent)
 {
@@ -82,11 +94,16 @@ void PixmapWidget::paintEvent(QPaintEvent * mpEvent)
     }
 
     // Scale to current size
-    QPixmap scaled = m_Pixmap.scaled(width(), height(), Qt::KeepAspectRatio);
-    if (scaled.width() > m_Pixmap.width())
+    QPixmap scaled;
+    if (width() > m_Pixmap.width())
     {
         // Don't enlarge
         scaled = m_Pixmap;
+    } else
+    {
+        // Scale to widget size
+        scaled = m_Pixmap.scaled(size(), Qt::KeepAspectRatio,
+            Qt::SmoothTransformation);
     }
 
     // Get box we need to draw

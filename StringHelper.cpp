@@ -628,6 +628,42 @@ bool StringHelper::LessThan_IntDate(const QPair < int, QString > mcLeft,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Case-insensitive string comparoson
+bool StringHelper::LessThan_CaseInsensitive(const QString mcLeft,
+    const QString mcRight)
+{
+    CALL_IN(QString("mcLeft=%1, mcRight=%2")
+        .arg(CALL_SHOW(mcLeft),
+             CALL_SHOW(mcRight)));
+
+    QString left(mcLeft.toLower());
+    QString right(mcRight.toLower());
+
+    CALL_OUT("");
+    return (left < right);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Case-insensitive string comparoson
+bool StringHelper::GreaterThan_CaseInsensitive(const QString mcLeft,
+    const QString mcRight)
+{
+    CALL_IN(QString("mcLeft=%1, mcRight=%2")
+        .arg(CALL_SHOW(mcLeft),
+             CALL_SHOW(mcRight)));
+
+    QString left(mcLeft.toLower());
+    QString right(mcRight.toLower());
+
+    CALL_OUT("");
+    return (left > right);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Compare Strings with natural order
 bool StringHelper::LessThan_Natural(const QString mcLeft,
     const QString mcRight)
