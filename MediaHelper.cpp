@@ -472,3 +472,111 @@ QPixmap MediaHelper::GetCoverArt(const QString & mcrFilename)
     return cover_art;
 }
 
+
+
+// ================================================================== Histogram
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculate histogram
+QList < double > MediaHelper::CalculateHistogram(const QImage & mcrPicture)
+{
+    CALL_IN(QString("mcrPicture=%1")
+        .arg(CALL_SHOW(mcrPicture)));
+
+    // Check if we have a picture
+    if (mcrPicture.isNull())
+    {
+        const QString reason = tr("No picture provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QList < double >();
+    }
+
+    QList < double > histogram(256, 0);
+    const double increment = 1. / mcrPicture.width() / mcrPicture.height();
+    for (int x = 0; x < mcrPicture.width(); x++)
+    {
+        for (int y = 0; y < mcrPicture.height(); y++)
+        {
+            const QRgb color = mcrPicture.pixel(x, y);
+            const int intensity = qGray(color);
+            histogram[intensity] += increment;
+        }
+    }
+
+    CALL_OUT("");
+    return histogram;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculate histogram
+QList < double > MediaHelper::CalculateHistogram(
+    const QString & mcrPictureFilename)
+{
+    CALL_IN(QString("mcrPictureFilename=%1")
+        .arg(CALL_SHOW(mcrPictureFilename)));
+
+    const QImage image(mcrPictureFilename);
+    if (image.isNull())
+    {
+        const QString reason = tr("\"%1\" is not a picture file.")
+            .arg(mcrPictureFilename);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QList < double >();
+    }
+
+    const QList < double > histogram = CalculateHistogram(image);
+
+    CALL_OUT("");
+    return histogram;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculate distance between two histograms
+double MediaHelper::CalculateHistogramDistance(
+    const QList < double > & mcrFirstHistogram,
+    const QList < double > & mcrSecondHistogram)
+{
+    CALL_IN(QString("mcrFirstHistogram=%1, mcrSecondHistogram=%2")
+        .arg(CALL_SHOW(mcrFirstHistogram),
+             CALL_SHOW(mcrSecondHistogram)));
+
+    // Check if histograms have the correct size
+    if (mcrFirstHistogram.size() != 256)
+    {
+        const QString reason = tr("First histogram does not have the correct "
+            "number of bins (%1 instead of 256).")
+            .arg(QString::number(mcrFirstHistogram.size()));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return NAN;
+    }
+    if (mcrSecondHistogram.size() != 256)
+    {
+        const QString reason = tr("Second histogram does not have the correct "
+            "number of bins (%1 instead of 256).")
+            .arg(QString::number(mcrSecondHistogram.size()));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return NAN;
+    }
+
+    double distance = 0;
+    for (int bin = 0;
+         bin < 256;
+         bin++)
+    {
+        // L1 distance shoud do it
+        distance += fabs(mcrFirstHistogram[bin] - mcrSecondHistogram[bin]);
+    }
+
+    CALL_OUT("");
+    return distance;
+}

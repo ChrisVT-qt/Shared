@@ -67,6 +67,19 @@ public:
 
     // Get cover art image
     static QPixmap GetCoverArt(const QString & mcrFilename);
-};
 
+
+
+    // ============================================================== Histogram
+public:
+    // Calculate histogram
+    static QList < double > CalculateHistogram(const QImage & mcrPicture);
+    static QList < double > CalculateHistogram(
+        const QString & mcrPictureFilename);
+
+    // Calculate distance between two histograms
+    static double CalculateHistogramDistance(
+        const QList < double > & mcrFirstHistogram,
+        const QList < double > & mcrSecondHistogram);
+};
 #endif
