@@ -61,6 +61,27 @@ QDomElement XMLHelper::SearchElement(const QDomElement mcParentElement,
     {
         // Check if this is <div class="Conversations-content">
         QDomElement element = to_check.takeFirst();
+
+        // Has a particular tag
+        if (element.tagName() == mcTagName &&
+            mcAttribute.isEmpty() &&
+            mcAttributeValue.isEmpty())
+        {
+            CALL_OUT("");
+            return element;
+        }
+
+        // Has a particular tag and a particular attribute
+        if (element.tagName() == mcTagName &&
+            element.hasAttribute(mcAttribute) &&
+            mcAttributeValue.isEmpty())
+        {
+            CALL_OUT("");
+            return element;
+        }
+
+        // Has a particular tag, a particular attribute, and the attribute
+        // has a particular value
         if (element.tagName() == mcTagName &&
             element.hasAttribute(mcAttribute) &&
             element.attribute(mcAttribute) == mcAttributeValue)
