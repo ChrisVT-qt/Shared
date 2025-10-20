@@ -1307,7 +1307,7 @@ int ExifInfo::GetOrientation() const
         {
             const QString reason = tr("%1: Unknown orientation %2")
                 .arg(m_Filename,
-                    orientation);
+                    QString::number(orientation));
             MessageLogger::Error(CALL_METHOD, reason);
             CALL_OUT("");
             return -1;
