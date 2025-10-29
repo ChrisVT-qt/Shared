@@ -2455,6 +2455,7 @@ void ExifInfo::Init_CameraModelMapper()
         "Galaxy S6 Edge+ (Factory Unlocked)";
     m_CameraModelMapper["Samsung.SM-G930V"] = "Galaxy S7 SM-G930V (Verizon)";
     m_CameraModelMapper["Samsung.SM-G965U"] = "Galaxy S9+ SM-G965U (Unlocked)";
+    m_CameraModelMapper["Samsung.SM-G996U"] = "Galaxy S21+ 5G SM-G996U";
     m_CameraModelMapper["Samsung.SM-J500FN"] = "Galaxy J5 SM-J500FN";
     m_CameraModelMapper["Samsung.SM-J500M"] = "Galaxy J5 SM-J500M";
     m_CameraModelMapper["Samsung.SM-N920T"] = "Galaxy Note 5 SM-N920T";
