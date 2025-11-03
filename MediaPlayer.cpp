@@ -878,11 +878,19 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
         return -1;
     }
 
+    // Original width and height
+    const int original_width =
+        meta_data.value(QMediaMetaData::Resolution).toSize().width();
+    const int original_height =
+        meta_data.value(QMediaMetaData::Resolution).toSize().height();
+
     // Add media data
     const int new_index = m_PlayList_NextIndex++;
     m_PlayList_Indices << new_index;
     m_PlayList_Filename[new_index] = mcrLocalFilename;
     m_PlayList_Title[new_index] = mcrTitle;
+    m_PlayList_OriginalWidth[new_index] = original_width;
+    m_PlayList_OriginalHeight[new_index] = original_height;
     m_PlayList_MinTimeMS[new_index] = mcMinTimeMS;
     m_PlayList_MaxTimeMS[new_index] = mcMaxTimeMS;
     m_PlayList_DurationMS[new_index] = duration_ms;
@@ -1425,8 +1433,8 @@ bool MediaPlayer::RemoveMediaFile(const int mcIndex)
     {
         // Picking the next song:
         // 1. If this is the only song, invalidate the current index.
-        // 1. If this is not the last song, skip to the next
-        // 2. If this is the last song, pick the second-to-last
+        // 2. If this is not the last song, skip to the next
+        // 3. If this is the last song, pick the second-to-last
         if (m_PlayList_Indices.size() == 1)
         {
             PlayPlayListIndex(-1);
@@ -1450,8 +1458,11 @@ bool MediaPlayer::RemoveMediaFile(const int mcIndex)
     m_PlayList_Indices.removeAll(mcIndex);
     m_PlayList_Filename.remove(mcIndex);
     m_PlayList_Title.remove(mcIndex);
+    m_PlayList_OriginalWidth.remove(mcIndex);
+    m_PlayList_OriginalHeight.remove(mcIndex);
     m_PlayList_MinTimeMS.remove(mcIndex);
     m_PlayList_MaxTimeMS.remove(mcIndex);
+    m_PlayList_DurationMS.remove(mcIndex);
     m_PlayList_CoverArt.remove(mcIndex);
 
     // Update playlist

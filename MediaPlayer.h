@@ -142,10 +142,12 @@ public:
     // Play a particular song
     bool PlayPlayListIndex(const int mcIndex);
 
-private:
+protected:
     QList < int > m_PlayList_Indices;
     QHash < int, QString > m_PlayList_Filename;
     QHash < int, QString > m_PlayList_Title;
+    QHash < int, int > m_PlayList_OriginalWidth;
+    QHash < int, int > m_PlayList_OriginalHeight;
     QHash < int, qint64 > m_PlayList_MinTimeMS;
     QHash < int, qint64 > m_PlayList_MaxTimeMS;
     QHash < int, qint64 > m_PlayList_DurationMS;
