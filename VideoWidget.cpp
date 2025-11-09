@@ -21,6 +21,7 @@ VideoWidget::VideoWidget(QWidget * mpParentWidget)
     : QVideoWidget(mpParentWidget)
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -34,6 +35,7 @@ VideoWidget::VideoWidget(QWidget * mpParentWidget)
 VideoWidget::~VideoWidget()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 

@@ -41,6 +41,7 @@
 MD5Sum::MD5Sum()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Do nothing.
 
@@ -54,6 +55,7 @@ MD5Sum::MD5Sum()
 MD5Sum::~MD5Sum()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Do nothing.
 

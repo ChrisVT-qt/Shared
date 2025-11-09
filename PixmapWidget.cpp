@@ -20,6 +20,7 @@
 PixmapWidget::PixmapWidget()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do.
 
@@ -33,6 +34,7 @@ PixmapWidget::PixmapWidget()
 PixmapWidget::~PixmapWidget()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

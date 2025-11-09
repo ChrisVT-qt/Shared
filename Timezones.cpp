@@ -20,6 +20,7 @@
 Timezones::Timezones()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Initialize known timezones
     Initialize();
@@ -56,6 +57,7 @@ Timezones * Timezones::m_Instance = nullptr;
 Timezones::~Timezones()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do, either.
 

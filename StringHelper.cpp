@@ -43,6 +43,7 @@
 StringHelper::StringHelper()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do.
 
@@ -56,6 +57,7 @@ StringHelper::StringHelper()
 StringHelper::~StringHelper()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do, either.
 

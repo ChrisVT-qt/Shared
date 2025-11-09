@@ -39,6 +39,7 @@
 ExifInfo::ExifInfo()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do.
 
@@ -52,6 +53,7 @@ ExifInfo::ExifInfo()
 ExifInfo::~ExifInfo()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

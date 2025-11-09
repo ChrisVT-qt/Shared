@@ -39,6 +39,8 @@
 // Default constructor
 MessageLogger::MessageLogger()
 {
+    REGISTER_INSTANCE;
+
     // Nothing to do.
 }
 
@@ -71,6 +73,8 @@ MessageLogger * MessageLogger::m_Instance = nullptr;
 // Destructor
 MessageLogger::~MessageLogger()
 {
+    UNREGISTER_INSTANCE;
+
     // Nothing to do.
 }
 

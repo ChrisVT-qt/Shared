@@ -17,6 +17,7 @@
 XMLHelper::XMLHelper()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -30,6 +31,7 @@ XMLHelper::XMLHelper()
 XMLHelper::~XMLHelper()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 

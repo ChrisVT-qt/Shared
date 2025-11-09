@@ -45,6 +45,7 @@
 SystemHelper::SystemHelper()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do.
 
@@ -58,6 +59,7 @@ SystemHelper::SystemHelper()
 SystemHelper::~SystemHelper()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

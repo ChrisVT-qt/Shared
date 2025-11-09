@@ -29,6 +29,7 @@
 Geocode::Geocode()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Initialize IDs
     m_NextSearchId = 0;
@@ -76,6 +77,7 @@ Geocode * Geocode::m_Instance = nullptr;
 Geocode::~Geocode()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

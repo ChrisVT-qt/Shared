@@ -45,6 +45,7 @@
 PList::PList()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Should never be instanciated
 
@@ -58,6 +59,7 @@ PList::PList()
 PList::~PList()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

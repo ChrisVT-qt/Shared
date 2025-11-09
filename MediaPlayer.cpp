@@ -52,6 +52,7 @@
 MediaPlayer::MediaPlayer()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // We do have a playlist per default
     m_HasPlayList = true;
@@ -93,6 +94,7 @@ MediaPlayer::MediaPlayer()
 MediaPlayer::~MediaPlayer()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 

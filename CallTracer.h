@@ -105,6 +105,15 @@
      */
     #define CALL_TIMESTAMP \
         QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")
+
+   /** \brief Register new instance of an object
+    */
+    #define REGISTER_INSTANCE CallTracer::RegisterInstance(this, CALL_CLASS)
+
+   /** \brief Unregister instance
+    */
+    #define UNREGISTER_INSTANCE \
+        CallTracer::UnregisterInstance(this, CALL_CLASS)
 #endif
 
 // Define class
@@ -250,6 +259,28 @@ private:
     /** \brief Verbosity
       */
     static bool m_IsVerbose;
+
+public:
+    /** \brief Register a new instance
+      * \param mpInstance pointer to identify the instance
+      * \param mpClass name of the class
+      */
+    static void RegisterInstance(void * mpInstance, const QString & mcrClass);
+
+    /** \brief Unregister an instance
+      * \param mpInstance pointer to identify the instance
+      * \param mpClass name of the class
+      */
+    static void UnregisterInstance(void * mpInstance,
+        const QString & mcrClass);
+private:
+    static QHash < QString, QSet < void * > > m_ClassToInstances;
+    static QHash < void *, QString > m_InstanceToCallingMethod;
+
+public:
+    // Summary of unreleased instances
+    static void ShowUnregisteredInstances();
+    static void ShowUnregisteredInstancesCallers(const QString & mcrClass);
 
 
 
