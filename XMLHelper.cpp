@@ -59,8 +59,17 @@ QDomElement XMLHelper::SearchElement(const QDomElement mcParentElement,
     to_check << mcParentElement;
     while (!to_check.isEmpty())
     {
-        // Check if this is <div class="Conversations-content">
+        // Check if this is <[tag]> if not attribute and values are provided
         QDomElement element = to_check.takeFirst();
+        if (element.tagName() == mcTagName &&
+            mcAttribute.isEmpty() &&
+            mcAttributeValue.isEmpty())
+        {
+            CALL_OUT("");
+            return element;
+        }
+
+        // Check if this is <[tag] [attribute]=[value]>
         if (element.tagName() == mcTagName &&
             element.hasAttribute(mcAttribute) &&
             element.attribute(mcAttribute) == mcAttributeValue)

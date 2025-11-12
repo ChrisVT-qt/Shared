@@ -37,8 +37,8 @@ public:
 public:
     // Get a particular element
     static QDomElement SearchElement(const QDomElement mcParentElement,
-        const QString mcTagName, const QString mcAttribute,
-        const QString mcAttributeValue);
+        const QString mcTagName, const QString mcAttribute = "",
+        const QString mcAttributeValue = "");
 
     // Get a particular child element
     static QDomElement NavigateToChildElement(QDomElement mParentElement,
