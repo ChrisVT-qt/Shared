@@ -380,6 +380,175 @@ bool CallTracer::m_IsVerbose = false;
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+// Register a new instance
+void CallTracer::RegisterInstance(void * mpInstance, const QString & mcrClass)
+{
+    // Registration can only be from a constructor
+    QStringList split_caller = m_CallStack_Method.last().split("::");
+    if (split_caller.size() != 2 ||
+        split_caller[0] != split_caller[1])
+    {
+        const QString reason =
+            tr("Attempted to register an instance from %1 which does not "
+                "appear to be a constructor.")
+                .arg(mcrClass);
+        qDebug().noquote() << reason;
+        return;
+    }
+
+    // Check if instance is already registered
+    if (m_ClassToInstances[mcrClass].contains(mpInstance))
+    {
+        const QString reason =
+            tr("Instance %1 of class %2 has alread been registered.")
+            .arg(CALL_SHOW(mpInstance),
+                 mcrClass);
+        qDebug().noquote() << reason;
+        return;
+    }
+
+    if (false)
+    {
+        qDebug().noquote() << tr("Registered instance %1 of class %2")
+            .arg(CALL_SHOW(mpInstance),
+                 mcrClass);
+    }
+
+    // Register it.
+    m_ClassToInstances[mcrClass] += mpInstance;
+    if (m_CallStack_Method.size() > 1)
+    {
+        m_InstanceToCallingMethod[mpInstance] =
+            m_CallStack_Method.at(m_CallStack_Method.size() - 2);
+    } else
+    {
+        m_InstanceToCallingMethod[mpInstance] = "";
+    }
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Unregister an instance
+void CallTracer::UnregisterInstance(void * mpInstance, const QString & mcrClass)
+{
+    // Unregistration can only be from a destructor
+    QStringList split_caller = m_CallStack_Method.last().split("::~");
+    if (split_caller.size() != 2 ||
+        split_caller[0] != split_caller[1])
+    {
+        const QString reason =
+            tr("Attempted to unregister an instance from %1 which does not "
+                "appear to be a destructor.")
+                .arg(mcrClass);
+        qDebug().noquote() << reason;
+        return;
+    }
+
+    // Check if instance is actually registered
+    if (!m_ClassToInstances[mcrClass].contains(mpInstance))
+    {
+        const QString reason =
+            tr("Instance %1 of class %2 has never been registered.")
+            .arg(CALL_SHOW(mpInstance),
+                 mcrClass);
+        qDebug().noquote() << reason;
+        return;
+    }
+
+    if (false)
+    {
+        qDebug().noquote() << tr("Unregister instance %1 of class %2")
+            .arg(CALL_SHOW(mpInstance),
+                 mcrClass);
+    }
+
+    // Register it.
+    m_ClassToInstances[mcrClass] -= mpInstance;
+    if (m_ClassToInstances[mcrClass].isEmpty())
+    {
+        m_ClassToInstances.remove(mcrClass);
+    }
+    m_InstanceToCallingMethod.remove(mpInstance);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Record keepers
+QHash < QString, QSet < void * > > CallTracer::m_ClassToInstances =
+    QHash < QString, QSet < void * > >();
+QHash < void *, QString > CallTracer::m_InstanceToCallingMethod =
+    QHash < void *, QString >();
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Summary of unreleased instances
+void CallTracer::ShowUnregisteredInstances()
+{
+    QHash < QString, int > frequency;
+    for (auto class_iterator = m_ClassToInstances.keyBegin();
+         class_iterator != m_ClassToInstances.keyEnd();
+         class_iterator++)
+    {
+        const QString & this_class = *class_iterator;
+        frequency[this_class] = m_ClassToInstances[this_class].size();
+    }
+
+    qDebug().noquote() << tr("===== Undeleted instances statistics per class");
+    QStringList sorted_classes = StringHelper::SortHash(frequency);
+    sorted_classes =
+        QStringList(sorted_classes.rbegin(), sorted_classes.rend());
+    for (auto class_iterator = sorted_classes.begin();
+         class_iterator != sorted_classes.end();
+         class_iterator++)
+    {
+        const QString & this_class = *class_iterator;
+        qDebug().noquote() << QString("%1: %2")
+            .arg(QString::number(frequency[this_class]),
+                 this_class);
+    }
+    qDebug().noquote() << "\n";
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Summary of unreleased instances
+void CallTracer::ShowUnregisteredInstancesCallers(const QString & mcrClass)
+{
+    QHash < QString, int > frequency;
+    for (auto instance_iterator = m_ClassToInstances[mcrClass].begin();
+         instance_iterator != m_ClassToInstances[mcrClass].end();
+         instance_iterator++)
+    {
+        void * instance = *instance_iterator;
+        const QString caller = m_InstanceToCallingMethod[instance];
+        frequency[caller]++;
+    }
+
+    qDebug().noquote() << tr("===== Undeleted instances of class %1: "
+        "caller statistics")
+        .arg(mcrClass);
+    QStringList sorted_callers = StringHelper::SortHash(frequency);
+    sorted_callers =
+        QStringList(sorted_callers.rbegin(), sorted_callers.rend());
+    for (auto caller_iterator = sorted_callers.begin();
+         caller_iterator != sorted_callers.end();
+         caller_iterator++)
+    {
+        const QString & caller = *caller_iterator;
+        qDebug().noquote() << QString("%1: %2")
+            .arg(QString::number(frequency[caller]),
+                 caller);
+    }
+    qDebug().noquote() << "\n";
+}
+
+
+
 // ================================================================ Convenience
 
 

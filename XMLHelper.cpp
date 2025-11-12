@@ -17,6 +17,7 @@
 XMLHelper::XMLHelper()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -30,6 +31,7 @@ XMLHelper::XMLHelper()
 XMLHelper::~XMLHelper()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -61,6 +63,27 @@ QDomElement XMLHelper::SearchElement(const QDomElement mcParentElement,
     {
         // Check if this is <[tag]> if not attribute and values are provided
         QDomElement element = to_check.takeFirst();
+
+        // Has a particular tag
+        if (element.tagName() == mcTagName &&
+            mcAttribute.isEmpty() &&
+            mcAttributeValue.isEmpty())
+        {
+            CALL_OUT("");
+            return element;
+        }
+
+        // Has a particular tag and a particular attribute
+        if (element.tagName() == mcTagName &&
+            element.hasAttribute(mcAttribute) &&
+            mcAttributeValue.isEmpty())
+        {
+            CALL_OUT("");
+            return element;
+        }
+
+        // Has a particular tag, a particular attribute, and the attribute
+        // has a particular value
         if (element.tagName() == mcTagName &&
             mcAttribute.isEmpty() &&
             mcAttributeValue.isEmpty())

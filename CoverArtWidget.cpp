@@ -20,6 +20,7 @@ CoverArtWidget::CoverArtWidget() :
     PixmapWidget()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -33,6 +34,7 @@ CoverArtWidget::CoverArtWidget() :
 CoverArtWidget::~CoverArtWidget()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 

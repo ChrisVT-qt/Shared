@@ -46,6 +46,7 @@ Email::Email(const QString mcFilename)
 {
     CALL_IN(QString("mcFilename=%1")
         .arg(CALL_SHOW_FULL(mcFilename)));
+    REGISTER_INSTANCE;
 
     // Debugging
     if (DEBUG)
@@ -107,6 +108,7 @@ Email::Email(NavigatedTextFile & mrEmailFile, const QString mcType)
 {
     CALL_IN(QString("mrEmailFile=..., mcType=%1")
         .arg(CALL_SHOW(mcType)));
+    REGISTER_INSTANCE;
 
     // No checks - private constructor
     
@@ -250,6 +252,7 @@ QList < Email * > Email::ImportFromEMLXFile(const QString mcFilename)
 Email::~Email()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Debugging
     if (DEBUG)

@@ -41,6 +41,7 @@ NavigatedTextFile::NavigatedTextFile(const QString mcFilename)
 {
     CALL_IN(QString("mcFilename=%1")
         .arg(CALL_SHOW(mcFilename)));
+    REGISTER_INSTANCE;
 
     // Initilize current line
     m_LineNumber = 0;
@@ -118,6 +119,7 @@ NavigatedTextFile::NavigatedTextFile(const QString mcFilename)
 NavigatedTextFile::~NavigatedTextFile()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

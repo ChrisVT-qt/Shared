@@ -26,6 +26,7 @@
 MediaHelper::MediaHelper()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -39,6 +40,7 @@ MediaHelper::MediaHelper()
 MediaHelper::~MediaHelper()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -264,7 +266,10 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     {
         const int rate =
             media_metadata.value(QMediaMetaData::AudioBitRate).toInt();
-        metadata[Metadata_AudioBitRate] = QString::number(rate);
+        if (rate > 0)
+        {
+            metadata[Metadata_AudioBitRate] = QString::number(rate);
+        }
     }
 
     // Audio codec
@@ -335,7 +340,10 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     {
         const int rate =
             media_metadata.value(QMediaMetaData::VideoBitRate).toInt();
-        metadata[Metadata_VideoBitRate] = QString::number(rate);
+        if (rate > 0)
+        {
+            metadata[Metadata_VideoBitRate] = QString::number(rate);
+        }
     }
 
     // Video frame rate

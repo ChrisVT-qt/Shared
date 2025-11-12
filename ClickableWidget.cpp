@@ -38,6 +38,7 @@
 ClickableWidget::ClickableWidget()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Fill background (needed to show selection state)
     setAutoFillBackground(true);
@@ -55,6 +56,7 @@ ClickableWidget::ClickableWidget()
 ClickableWidget::~ClickableWidget()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 

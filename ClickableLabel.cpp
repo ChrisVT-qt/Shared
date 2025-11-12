@@ -39,6 +39,7 @@ ClickableLabel::ClickableLabel()
     : QLabel()
 {
     CALL_IN("");
+    REGISTER_INSTANCE;
 
     // Nothing to do
 
@@ -52,6 +53,7 @@ ClickableLabel::ClickableLabel()
 ClickableLabel::~ClickableLabel()
 {
     CALL_IN("");
+    UNREGISTER_INSTANCE;
 
     // Nothing to do.
 
