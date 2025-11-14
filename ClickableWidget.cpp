@@ -286,6 +286,31 @@ void ClickableWidget::mouseDoubleClickEvent(QMouseEvent * mpEvent)
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+// Context menu
+void ClickableWidget::contextMenuEvent(QContextMenuEvent * mpEvent)
+{
+    CALL_IN(QString("mpEvent=%1")
+        .arg(CALL_SHOW(mpEvent)));
+
+    // Accept event
+    mpEvent -> accept();
+
+    // Check for widget under mouse pointer
+    const QPoint pos = mpEvent -> pos();
+    QWidget * clicked_widget = childAt(pos);
+
+    // Global position (where to open context menu)
+    const QPoint global_pos = mapToGlobal(pos);
+
+    // Let the world know
+    emit ContextMenu(clicked_widget, global_pos);
+
+    CALL_OUT("");
+}
+
+
+
 // ======================================================================= Misc
 
 

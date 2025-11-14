@@ -24,6 +24,7 @@
 #include <QMediaMetaData>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QRadioButton>
 #include <QScrollArea>
 #include <QStyle>
@@ -1173,6 +1174,22 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Context menu in playlist
+void MediaPlayer::PlayListContextMenu(const int mcIndex,
+    const QPoint & mcrPosition)
+{
+    CALL_IN(QString("mcIndex=%1, mcrPosition=%2")
+        .arg(CALL_SHOW(mcIndex),
+             CALL_SHOW(mcrPosition)));
+
+    // Does nothing in base class
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Update playlist
 void MediaPlayer::Update_PlayList()
 {
@@ -1221,6 +1238,14 @@ void MediaPlayer::Update_PlayList()
         container -> setLayout(layout);
         connect (container, &ClickableWidget::SingleClicked,
             this, [=](){PlayPlayListIndex(index);});
+        connect (container, &ClickableWidget::ContextMenu,
+            this,
+            [=](QWidget * mpChildWidget, const QPoint & mcrPosition)
+            {
+                Q_UNUSED(mpChildWidget);
+                PlayListContextMenu(index, mcrPosition);
+            }
+            );
 
         QLabel * label = new QLabel(container);
         label -> setFixedWidth(16);
@@ -1486,6 +1511,17 @@ QImage MediaPlayer::GetCurrentFrame() const
     QVideoFrame video_frame = video_sink -> videoFrame();
     QImage image = video_frame.toImage();
 
+    // We have to do the following shenanigans to work around an issue with
+    // some videos where the video frame, when saved as a file, will be much
+    // brighter than the original video. Copying the frame into a new picture
+    // seems to fix this.
+    QImage destination_image(image.width(), image.height(),
+        QImage::Format_RGB32);
+    QPainter painter(&destination_image);
+    painter.fillRect(0, 0, image.width(), image.height(), Qt::black);
+    painter.drawPixmap(0, 0, image.width(), image.height(),
+        QPixmap::fromImage(image));
+
     CALL_OUT("");
-    return image;
+    return destination_image;
 }

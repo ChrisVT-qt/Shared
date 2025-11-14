@@ -1211,6 +1211,17 @@ QString CallTracer::Show(const QPixmap & mcrValue)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Show QPoint
+QString CallTracer::Show(const QPoint & mcrValue)
+{
+    return QString("(%1, %2)")
+        .arg(QString::number(mcrValue.x()),
+             QString::number(mcrValue.y()));
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Show QSet
 QString CallTracer::Show(const QSet < double > & mcrValue)
 {

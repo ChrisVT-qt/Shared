@@ -588,3 +588,45 @@ double MediaHelper::CalculateHistogramDistance(
     CALL_OUT("");
     return distance;
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculate brightness of a picture
+double MediaHelper::CalculateBrightness(const QImage & mcrPicture)
+{
+    CALL_IN(QString("mcrPicture=%1")
+        .arg(CALL_SHOW(mcrPicture)));
+
+    // Check if we have a picture
+    if (mcrPicture.isNull())
+    {
+        const QString reason = tr("No picture provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return NAN;
+    }
+
+    // Get histogram
+    const QList < double > histogram = CalculateHistogram(mcrPicture);
+    if (histogram.size() != 256)
+    {
+        const QString reason = tr("Could not create histogram for picture.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return NAN;
+    }
+
+    // Calculate brightness
+    double brightness = 0;
+    for (int bin = 0;
+         bin < 256;
+         bin++)
+    {
+        brightness += bin * histogram[bin];
+    }
+
+    CALL_OUT("");
+    return brightness;
+}
+

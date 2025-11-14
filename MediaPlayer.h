@@ -64,6 +64,7 @@ private:
     QToolButton * m_PlayPauseButton;
     QToolButton * m_NextButton;
 
+protected:
     QWidget * m_PlayList;
     QWidget * m_PlayListContainerWidget;
     QVBoxLayout * m_PlayListLayout;
@@ -119,7 +120,7 @@ public:
 
     // Current index
     int GetCurrentIndex() const;
-private:
+protected:
     int m_PlayList_CurrentIndex;
 
 public:
@@ -139,8 +140,14 @@ public:
     // The indices
     QList < int > GetAllPlayListIndices() const;
 
+public slots:
     // Play a particular song
     bool PlayPlayListIndex(const int mcIndex);
+
+protected:
+    // Context menu in playlist
+    virtual void PlayListContextMenu(const int mcIndex,
+        const QPoint & mcrPosition);
 
 protected:
     QList < int > m_PlayList_Indices;

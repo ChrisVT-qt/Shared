@@ -100,7 +100,10 @@ protected:
       */
     QWidget * m_DragCurrentWidget;
 
-    
+    // Context menu
+    virtual void contextMenuEvent(QContextMenuEvent * mpEvent);
+
+
 
     // ================================================================ Signals
 signals:
@@ -130,6 +133,11 @@ signals:
       * \param mpWidget Widget that was dropped into
       */
     void DroppedOn(const QMimeData * mcpMimeData, QWidget * mpWidget);
+
+    /** \brief Emitted when context menu is opened
+      * \param mpWidget Widget being hovered
+      */
+    void ContextMenu(QWidget * mpWidget, const QPoint & mcrPosition);
 
 
 

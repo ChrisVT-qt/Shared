@@ -516,6 +516,12 @@ public:
       */
     static QString Show(const QPixmap & mcrValue);
 
+    /** \brief Show QPoint value in human readable form.
+      * \param mcValue The value to show
+      * \returns a QString with a human readable representation of the value
+      */
+    static QString Show(const QPoint & mcrValue);
+
     /** \brief Show QSet < double > value in human readable form.
       * \param mcValue The value to show
       * \returns a QString with a human readable representation of the value

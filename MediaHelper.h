@@ -81,5 +81,8 @@ public:
     static double CalculateHistogramDistance(
         const QList < double > & mcrFirstHistogram,
         const QList < double > & mcrSecondHistogram);
+
+    // Calculate brightness of a picture
+    static double CalculateBrightness(const QImage & mcrPicture);
 };
 #endif
