@@ -463,7 +463,7 @@ bool XMLHelper::Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
     {
         if (dom_child.isText())
         {
-            const QString text = dom_child.toText().data().trimmed();
+            const QString text = dom_child.toText().data();
             QDomText dom_text = dest_doc.createTextNode(text);
             dom_element.appendChild(dom_text);
             continue;
@@ -578,3 +578,26 @@ QSet < QString > XMLHelper::GetAllAttributes(QDomElement & mrElement)
     CALL_OUT("");
     return attributes;
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Strip leding DOCTYPE tag
+QString XMLHelper::StripDocType(QString mXML)
+{
+    CALL_IN(QString("mXML=%1")
+        .arg(CALL_SHOW(mXML)));
+
+    mXML.replace("\n", "\\n");
+    static const QRegularExpression format_doctype("^<!DOCTYPE [^>]+>(.*)$");
+    QRegularExpressionMatch match_doctype = format_doctype.match(mXML);
+    if (match_doctype.hasMatch())
+    {
+        mXML = match_doctype.captured(1).trimmed();
+    }
+    mXML.replace("\\n", "\n");
+
+    CALL_OUT("");
+    return mXML;
+}
+

@@ -74,6 +74,9 @@ public:
 
     // All attributes
     static QSet < QString > GetAllAttributes(QDomElement & mrParent);
+
+    // Strip leding DOCTYPE tag
+    static QString StripDocType(QString mXML);
 };
 
 #endif
