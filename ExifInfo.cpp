@@ -1941,6 +1941,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Canon.Canon EOS 5D Mark III"] = "EOS 5D Mark III";
     m_CameraModelMapper["Canon.Canon EOS 5D Mark IV"] = "EOS 5D Mark IV";
     m_CameraModelMapper["Canon.Canon EOS 6D"] = "EOS 6D";
+    m_CameraModelMapper["Canon.Canon EOS 6D Mark II"] = "EOD 6D Mark II";
     m_CameraModelMapper["Canon.Canon EOS 7D"] = "EOS 7D";
     m_CameraModelMapper["Canon.Canon EOS 7D Mark II"] = "EOS 7D Mark II";
     m_CameraModelMapper["Canon.Canon EOS Rebel T6s"] = "EOS Rebel T6s";
@@ -2669,11 +2670,14 @@ void ExifInfo::Init_LensModelMapper()
         "Canon EF-S 18-200mm f/3.5-5.6 IS";
     m_LensModelMapper[".EF24-105mm f/4L IS USM"] =
         "Canon EF 24-105mm f/4 L IS USM";
+    m_LensModelMapper[".EF50mm f/1.4 USM"] = "Canon EF 50mm f/1.4 USM";
+    m_LensModelMapper[".EF50mm f/1.8 STM"] = "Canon EF 50mm f/1.8 STM";
     m_LensModelMapper[".EF50mm f/2.5 Compact Macro"] =
         "Canon EF 50mm f/2.5 Compact Macro";
-    m_LensModelMapper[".EF50mm f/1.4 USM"] = "Canon EF 50mm f/1.4 USM";
     m_LensModelMapper[".EF-S55-250mm f/4-5.6 IS II"] =
         "Canon EF-S 55-250mm f/4-5.6 IS II";
+    m_LensModelMapper[".EF70-200mm f/2.8L IS II USM"] =
+        "Canon EF 70-200mm f/2.8 L IS USM II";
     m_LensModelMapper[".EF70-200mm f/4L USM"] = "Canon EF 70-200mm f/4 L USM";
     m_LensModelMapper[".EF70-300mm f/4-5.6 IS USM"] =
         "Canon EF 70-300mm f/4-5.6 IS USM";
