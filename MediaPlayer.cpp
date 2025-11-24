@@ -164,46 +164,8 @@ void MediaPlayer::InitGUI()
 
 
     // == Controls
-    QHBoxLayout * time_layout = new QHBoxLayout();
-    layout -> addLayout(time_layout);
-
-    m_CurrentTime = new QLabel(this);
-    time_layout -> addWidget(m_CurrentTime);
-
-    m_TimeSlider = new QSlider(this);
-    m_TimeSlider -> setOrientation(Qt::Horizontal);
-    connect (m_TimeSlider, &QSlider::sliderPressed,
-        this, &MediaPlayer::Time_Pressed);
-    connect (m_TimeSlider, &QSlider::sliderMoved,
-        this, &MediaPlayer::Time_Moved);
-    connect (m_TimeSlider, &QSlider::sliderReleased,
-        this, &MediaPlayer::Time_Released);
-    time_layout -> addWidget(m_TimeSlider);
-
-    m_MaxTime = new QLabel(this);
-    time_layout -> addWidget(m_MaxTime);
-
-    time_layout -> setStretch(0, 0);
-    time_layout -> setStretch(1, 1);
-    time_layout -> setStretch(2, 0);
-
-    // Volume and controls
     QHBoxLayout * controls_layout = new QHBoxLayout();
     layout -> addLayout(controls_layout);
-
-    m_MuteButton = new QToolButton(this);
-    m_MuteButton -> setIcon(style() -> standardIcon(QStyle::SP_MediaVolume));
-    connect (m_MuteButton, &QAbstractButton::clicked,
-        this, &MediaPlayer::ToggleMute);
-    controls_layout -> addWidget(m_MuteButton);
-
-    m_Volume = new QSlider(this);
-    m_Volume -> setOrientation(Qt::Horizontal);
-    m_Volume -> setRange(0, 100);
-    m_Volume -> setValue(DEFAULT_VOLUME * 100);
-    connect (m_Volume, &QSlider::valueChanged,
-        this, &MediaPlayer::SetVolume);
-    controls_layout -> addWidget(m_Volume);
 
     m_PreviousButton = new QToolButton(this);
     m_PreviousButton -> setIcon(
@@ -226,10 +188,50 @@ void MediaPlayer::InitGUI()
         this, &MediaPlayer::NextFile);
     controls_layout -> addWidget(m_NextButton);
 
-    controls_layout -> setStretch(0, 1);
+    m_CurrentTime = new QLabel(this);
+    controls_layout -> addWidget(m_CurrentTime);
+
+    m_TimeSlider = new QSlider(this);
+    m_TimeSlider -> setOrientation(Qt::Horizontal);
+    connect (m_TimeSlider, &QSlider::sliderPressed,
+        this, &MediaPlayer::Time_Pressed);
+    connect (m_TimeSlider, &QSlider::sliderMoved,
+        this, &MediaPlayer::Time_Moved);
+    connect (m_TimeSlider, &QSlider::sliderReleased,
+        this, &MediaPlayer::Time_Released);
+    controls_layout -> addWidget(m_TimeSlider);
+
+    m_MaxTime = new QLabel(this);
+    controls_layout -> addWidget(m_MaxTime);
+
+    controls_layout -> addSpacing(10);
+
+    m_MuteButton = new QToolButton(this);
+    m_MuteButton -> setIcon(style() -> standardIcon(QStyle::SP_MediaVolume));
+    connect (m_MuteButton, &QAbstractButton::clicked,
+        this, &MediaPlayer::ToggleMute);
+    controls_layout -> addWidget(m_MuteButton);
+
+    // Volume and controls
+    m_Volume = new QSlider(this);
+    m_Volume -> setOrientation(Qt::Horizontal);
+    m_Volume -> setRange(0, 100);
+    m_Volume -> setValue(DEFAULT_VOLUME * 100);
+    m_Volume -> setFixedWidth(50);
+    connect (m_Volume, &QSlider::valueChanged,
+        this, &MediaPlayer::SetVolume);
+    controls_layout -> addWidget(m_Volume);
+
+    controls_layout -> setStretch(0, 0);
     controls_layout -> setStretch(1, 0);
     controls_layout -> setStretch(2, 0);
     controls_layout -> setStretch(3, 0);
+    controls_layout -> setStretch(4, 0);
+    controls_layout -> setStretch(5, 0);
+    controls_layout -> setStretch(6, 1);
+    controls_layout -> setStretch(7, 0);
+    controls_layout -> setStretch(8, 0);
+    controls_layout -> setStretch(9, 0);
 
 
     // == Playlist
@@ -674,6 +676,13 @@ void MediaPlayer::ReplayPositionChanged(const qint64 mcNewPosition)
 {
     CALL_IN(QString("mcNewPosition=%1")
         .arg(CALL_SHOW(mcNewPosition)));
+
+    if (m_PlayList_CurrentIndex == -1)
+    {
+        // Nothing being played
+        CALL_OUT("");
+        return;
+    }
 
     // Check if we reached the end
     qint64 max_time = m_PlayList_MaxTimeMS[m_PlayList_CurrentIndex];
@@ -1475,10 +1484,10 @@ bool MediaPlayer::RemoveMediaFile(const int mcIndex)
             {
                 PlayPlayListIndex(m_PlayList_Indices[index_in_list + 1]);
             }
-        }
 
-        // Not playing if the media file changed
-        Pause();
+            // Not playing if the media file changed
+            Pause();
+        }
     }
 
     // Remove index

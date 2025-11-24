@@ -6,7 +6,6 @@
 #include "Geocode.h"
 #include "secrets/GoogleSecrets.h"
 #include "MessageLogger.h"
-#include "Preferences.h"
 
 // Qt includes
 #include <QDebug>
