@@ -27,6 +27,7 @@
 #include <QCryptographicHash>
 #include <QDataStream>
 #include <QFile>
+#include <QFileInfo>
 #include <QObject>
 #include <QString>
 
@@ -77,9 +78,13 @@ QString MD5Sum::ComputeMD5Sum(const QString mcFilename,
         .arg(CALL_SHOW(mcFilename),
              CALL_SHOW(mcLookUp)));
 
+    QFileInfo file_info(mcFilename);
+    const qint64 file_size = file_info.size();
+
     // Look up if we are supposed to
     if (!mcLookUp ||
-        !m_FilenameToMD5Sum.contains(mcFilename))
+        !m_FilesizeToFilenameToMD5Sum.contains(file_size) ||
+        !m_FilesizeToFilenameToMD5Sum[file_size].contains(mcFilename))
     {
         // Open file
         QFile in_file(mcFilename);
@@ -102,12 +107,12 @@ QString MD5Sum::ComputeMD5Sum(const QString mcFilename,
             QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
 
         // Store it.
-        m_FilenameToMD5Sum[mcFilename] = hash;
+        m_FilesizeToFilenameToMD5Sum[file_size][mcFilename] = hash;
     }
 
     // Return MD5 sum
     CALL_OUT("");
-    return m_FilenameToMD5Sum[mcFilename];
+    return m_FilesizeToFilenameToMD5Sum[file_size][mcFilename];
 }
 
 
@@ -129,4 +134,5 @@ QString MD5Sum::ComputeMD5Sum(const QByteArray & mcrData)
 
 ///////////////////////////////////////////////////////////////////////////////
 // MD5 Sum cache
-QHash < QString, QString > MD5Sum::m_FilenameToMD5Sum;
+QHash < qint64, QHash < QString, QString > >
+    MD5Sum::m_FilesizeToFilenameToMD5Sum;

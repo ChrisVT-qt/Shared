@@ -33,7 +33,8 @@ public:
 
 private:
     // MD5 Sum cache
-    static QHash < QString, QString > m_FilenameToMD5Sum;
+    static QHash < qint64, QHash < QString, QString > >
+        m_FilesizeToFilenameToMD5Sum;
 };
 
 #endif
