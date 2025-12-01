@@ -3580,38 +3580,21 @@ int StringHelper::Distance(const QString & mcrLeftWord,
     }
 
     // Check for cache hit
-    if (!m_DistanceCache.contains(mcrLeftWord) ||
-        !m_DistanceCache[mcrLeftWord].contains(mcrRightWord))
+    int distance = 0;
+    if (mcrLeftWord[0] == mcrRightWord[0])
     {
-        if (mcrLeftWord[0] == mcrRightWord[0])
-        {
-            m_DistanceCache[mcrLeftWord][mcrRightWord] =
-                Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1));
-        } else
-        {
-            int min_distance = Distance(mcrLeftWord.mid(1), mcrRightWord);
-            min_distance = qMin(min_distance,
-                Distance(mcrLeftWord, mcrRightWord.mid(1)));
-            min_distance = qMin(min_distance,
-                Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1)));
-            m_DistanceCache[mcrLeftWord][mcrRightWord] = 1 + min_distance;
-        }
+        distance =
+            Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1));
+    } else
+    {
+        int min_distance = Distance(mcrLeftWord.mid(1), mcrRightWord);
+        min_distance = qMin(min_distance,
+            Distance(mcrLeftWord, mcrRightWord.mid(1)));
+        min_distance = qMin(min_distance,
+            Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1)));
+        distance = 1 + min_distance;
     }
-
-    // Keep distance
-    const int distance = m_DistanceCache[mcrLeftWord][mcrRightWord];
-
-    // Avoid too large caches
-    // !!!
-    qDebug() << "Cache size: " << m_DistanceCache.capacity() << m_DistanceCache.size();
 
     // Value is in cache
     return distance;
 }
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Distance cache
-QHash < QString, QHash < QString, int > > StringHelper::m_DistanceCache =
-    QHash < QString, QHash < QString, int > >();

@@ -265,8 +265,6 @@ public:
     // Levenshtein distance
     static int Distance(const QString & mcrLeftWord,
         const QString & mcrRightWord);
-private:
-    static QHash < QString, QHash < QString, int > > m_DistanceCache;
 };
 
 #endif
