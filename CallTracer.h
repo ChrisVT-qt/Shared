@@ -72,6 +72,8 @@
     #define CALL_STACK() QString()
     #define CALL_SHOW(p) QString()
     #define CALL_TIMESTAMP QString()
+    #define REGISTER_INSTANCE {}
+    #define UNREGISTER_INSTANCE {}
 #else
     /** \brief Generates class name from filename
      */
