@@ -72,6 +72,7 @@
     #define CALL_STACK() QString()
     #define CALL_SHOW(p) QString()
     #define CALL_TIMESTAMP QString()
+    #define DEBUG_LINE {}
     #define REGISTER_INSTANCE {}
     #define UNREGISTER_INSTANCE {}
 #else
@@ -107,6 +108,10 @@
      */
     #define CALL_TIMESTAMP \
         QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")
+
+    /** \brief Debug info "I passed this line"
+     */
+    #define DEBUG_LINE CallTracer::DebugLine(__FILE__, __LINE__)
 
    /** \brief Register new instance of an object
     */
@@ -263,6 +268,12 @@ private:
     static bool m_IsVerbose;
 
 public:
+    /** \brief Print line for debugging purposes
+      * \param mcrFile indicates the filename
+      * \param mcLine is the line in this file
+      */
+    static void DebugLine(const QString & mcrFilename, const int mcLine);
+
     /** \brief Register a new instance
       * \param mpInstance pointer to identify the instance
       * \param mpClass name of the class

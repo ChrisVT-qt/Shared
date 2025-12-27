@@ -220,6 +220,8 @@ QString CallTracer::GetCallTrace()
 // Class name
 QString CallTracer::ClassName(const QString mcFilename)
 {
+    // Using StringHelper::SplitFilename here will create and infitite loop
+    // since the function calls CALL_IN() which uses ClassName().
     QString class_name;
     const int index = mcFilename.lastIndexOf("/");
     if (index != -1)
@@ -377,6 +379,24 @@ void CallTracer::SetVerbosity(const bool mcNewVerbosity)
 ///////////////////////////////////////////////////////////////////////////////
 // Verbosity
 bool CallTracer::m_IsVerbose = false;
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Print line for debugging purposes
+void CallTracer::DebugLine(const QString & mcrFile, const int mcLine)
+{
+    // Filename
+    const QPair < QString, QString > split_filename =
+        StringHelper::SplitFilename(mcrFile);
+    const QString now =
+        QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz");
+
+    qDebug().noquote() << tr("%1 %2: line %3")
+        .arg(now,
+             split_filename.second,
+             QString::number(mcLine));
+}
 
 
 

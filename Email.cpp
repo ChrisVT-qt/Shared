@@ -4555,6 +4555,7 @@ void Email::ReadBody_Part(NavigatedTextFile & mrEmailFile,
            << "text/plain"
            << "text/rtf"
            << "text/rfc822-headers"
+           << "text/x-amp-html"
            << "text/x-aol"
            << "text/x-csrc"
            << "text/x-gunzip"

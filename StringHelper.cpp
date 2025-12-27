@@ -3457,6 +3457,64 @@ QList < QString > StringHelper::UniqueElements(
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+// Convert lists
+QStringList StringHelper::ConvertToString(const QList < int > & mcrList)
+{
+    CALL_IN(QString("mcrList=%1")
+        .arg(CALL_SHOW(mcrList)));
+
+    QStringList list;
+    for (auto list_iterator = mcrList.begin();
+         list_iterator != mcrList.end();
+         list_iterator++)
+    {
+        list << QString::number(*list_iterator);
+    }
+
+    CALL_OUT("");
+    return list;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Convert sets
+QStringList StringHelper::ConvertToString(const QSet < int > & mcrSet)
+{
+    CALL_IN(QString("mcrSet=%1")
+        .arg(CALL_SHOW(mcrSet)));
+
+    QList < int > list = mcrSet.values();
+    std::sort(list.begin(), list.end());
+    const QStringList list_str = ConvertToString(list);
+
+    CALL_OUT("");
+    return list_str;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+QList < int > StringHelper::ConvertToInt(const QStringList & mcrList)
+{
+    CALL_IN(QString("mcrList=%1")
+        .arg(CALL_SHOW(mcrList)));
+
+    QList < int > list;
+    for (auto list_iterator = mcrList.begin();
+         list_iterator != mcrList.end();
+         list_iterator++)
+    {
+        list << (*list_iterator).toInt();
+    }
+
+    CALL_OUT("");
+    return list;
+}
+
+
+
 // ============================================================== Format stuff
 
 

@@ -77,6 +77,9 @@ public:
 
     // Strip leding DOCTYPE tag
     static QString StripDocType(QString mXML);
+
+    // Check for proper nesting
+    static QString CheckProperNesting(const QString & mcrXML);
 };
 
 #endif

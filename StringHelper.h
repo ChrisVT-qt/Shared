@@ -238,6 +238,11 @@ public:
     // Return unique elements of a list
     static QList < QString > UniqueElements(const QList < QString > mcValues);
 
+    // Convert lists
+    static QStringList ConvertToString(const QList < int > & mcrList);
+    static QStringList ConvertToString(const QSet < int > & mcrSet);
+    static QList < int > ConvertToInt(const QStringList & mcrList);
+
 
 
     // ========================================================== Format stuff

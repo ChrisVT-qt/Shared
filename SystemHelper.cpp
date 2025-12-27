@@ -99,6 +99,30 @@ QString SystemHelper::GetMIMEType(const QString & mcrFilename)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Determine file MIME type
+QString SystemHelper::GetMIMEType(const QByteArray & mcrData)
+{
+    CALL_IN(QString("mcrData=%1")
+        .arg(CALL_SHOW(mcrData)));
+
+    QMimeDatabase mime_database;
+    const QMimeType mime_type = mime_database.mimeTypeForData(mcrData);
+    if (mime_type.isValid())
+    {
+        CALL_OUT("");
+        return mime_type.name();
+    } else
+    {
+        // No MIME type
+        return QString();
+    }
+
+    // We never get here
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Get various apple xattr attributes
 const QHash < QString, QString > SystemHelper::GetAdditionalFileInfo(
     const QString mcFilename)

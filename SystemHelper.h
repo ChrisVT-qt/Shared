@@ -37,6 +37,7 @@ public:
 public:
     // Determine file MIME type
     static QString GetMIMEType(const QString & mcrFilename);
+    static QString GetMIMEType(const QByteArray & mcrData);
 
     // Get various Apple xattr attributes
     /** \todo Implement on Windows, Linux

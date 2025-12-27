@@ -1911,6 +1911,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
     m_CameraModelMapper["Apple.iPhone 15 Pro Max"] = "iPhone 15 Pro Max";
     m_CameraModelMapper["Apple.iPhone 16e"] = "iPhone 16e";
+    m_CameraModelMapper["Apple.iPhone 16 Pro Max"] = "iPhone 16 Pro Max";
     m_CameraModelMapper["Apple.iPhone SE (2nd generation)"] = "iPhone SE 2";
     m_CameraModelMapper["Apple.iPhone SE (3rd generation)"] = "iPhone SE 3";
 
@@ -2647,6 +2648,9 @@ void ExifInfo::Init_LensModelMapper()
         "Apple iPhone 16e Back Camera 4.2mm f/1.64";
     m_LensModelMapper["Apple.iPhone 16e front camera 2.69mm f/1.9"] =
         "Apple iPhone 16e Front Camera 2.69mm f/1.9";
+    m_LensModelMapper
+        ["Apple.iPhone 16 Pro Max back triple camera 6.765mm f/1.78"] =
+        "Apple iPhone 16 Pro Max Back Triple Camera 6.765mm f/1.78";
 
     // Canon
     m_LensModelMapper[".EF16-35mm f/2.8L II USM"] =

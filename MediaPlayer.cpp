@@ -818,8 +818,12 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
              CALL_SHOW(mcrCoverArt)));
 
     // Check if we already have this file on the playlist
-    for (int index : m_PlayList_Indices)
+    for (auto index_iterator = m_PlayList_Indices.begin();
+         index_iterator != m_PlayList_Indices.end();
+         index_iterator++)
     {
+        const int index = *index_iterator;
+
         if (m_PlayList_Filename[index] == mcrLocalFilename &&
             mcMinTimeMS == m_PlayList_MinTimeMS[index] &&
             mcMaxTimeMS == m_PlayList_MaxTimeMS[index])
@@ -1190,6 +1194,8 @@ void MediaPlayer::PlayListContextMenu(const int mcIndex,
     CALL_IN(QString("mcIndex=%1, mcrPosition=%2")
         .arg(CALL_SHOW(mcIndex),
              CALL_SHOW(mcrPosition)));
+    Q_UNUSED(mcIndex)
+    Q_UNUSED(mcrPosition)
 
     // Does nothing in base class
 

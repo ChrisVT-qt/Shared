@@ -129,12 +129,6 @@ QDomElement XMLHelper::NavigateToChildElement(const QDomElement mcParentElement,
         .arg(CALL_SHOW(mcParentElement),
              CALL_SHOW(mcPath)));
 
-    QStringList path;
-    for (const QStringList & item : mcPath)
-    {
-        path << CALL_SHOW(item);
-    }
-
     // Check if parent exists
     if (mcParentElement.isNull())
     {
@@ -582,7 +576,7 @@ QSet < QString > XMLHelper::GetAllAttributes(QDomElement & mrElement)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Strip leding DOCTYPE tag
+// Strip leading DOCTYPE tag
 QString XMLHelper::StripDocType(QString mXML)
 {
     CALL_IN(QString("mXML=%1")
@@ -599,5 +593,95 @@ QString XMLHelper::StripDocType(QString mXML)
 
     CALL_OUT("");
     return mXML;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Check for proper nesting
+QString XMLHelper::CheckProperNesting(const QString & mcrXML)
+{
+    CALL_IN(QString("mcrXML=%1")
+        .arg(CALL_SHOW(mcrXML)));
+
+    // Eliminate compact tags
+    // (Careful: "/" can be part of the attributes, such as f_stop="f/2.8")
+    QString xml = mcrXML;
+    xml.replace("\n", "");
+    static const QRegularExpression format_split_compact(
+        "(.*)<([^>]+)/>(.*)");
+    while (true)
+    {
+        QRegularExpressionMatch match_split_compact =
+            format_split_compact.match(xml);
+        if (!match_split_compact.hasMatch())
+        {
+            break;
+        }
+        xml = match_split_compact.captured(1) +
+            match_split_compact.captured(3);
+    }
+
+    // Eliminate attributes (in complete tags)
+    static const QRegularExpression format_split_attributes(
+        "([^<]*)<([^ >]+)( [^>]+)?>(.*)");
+    QString tags_only;
+    while (true)
+    {
+        QRegularExpressionMatch match_split_attributes =
+            format_split_attributes.match(xml);
+        if (!match_split_attributes.hasMatch())
+        {
+            break;
+        }
+        tags_only += "<" + match_split_attributes.captured(2) + ">";
+        xml = match_split_attributes.captured(4);
+    }
+    // Result looks like:
+    // <text><title></title></text>
+    xml = tags_only;
+
+    // Eliminate open/close pairs
+    if (xml.left(1) == "<")
+    {
+        xml = xml.mid(1);
+    }
+    if (xml.right(1) == ">")
+    {
+        xml = xml.left(xml.length() - 1);
+    }
+    QStringList tags = xml.split("><");
+    bool pair_found = true;
+    while (pair_found)
+    {
+        pair_found = false;
+        for (int remove_idx = 0;
+            remove_idx < tags.size() - 1;
+            remove_idx++)
+        {
+            if (tags[remove_idx + 1] == "/" + tags[remove_idx])
+            {
+                pair_found = true;
+                tags.removeAt(remove_idx);
+                tags.removeAt(remove_idx);
+                break;
+            }
+        }
+    }
+
+    // Result looks like:
+    // ("text", "body")
+
+    // Not properly nested if there are left overs
+    if (!tags.isEmpty())
+    {
+        const QString result = tr("A tag hasn't been closed: <%1>")
+            .arg(tags.join("><"));
+        CALL_OUT("");
+        return result;
+    }
+
+    CALL_OUT("");
+    return QString();
 }
 
