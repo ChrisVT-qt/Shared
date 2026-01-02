@@ -35,6 +35,9 @@ public:
 
     // ============================================================== Functions
 public:
+    // Download file
+    static QByteArray Download(const QString & mcrURL);
+
     // Determine file MIME type
     static QString GetMIMEType(const QString & mcrFilename);
     static QString GetMIMEType(const QByteArray & mcrData);

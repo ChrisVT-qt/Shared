@@ -66,20 +66,43 @@ private:
 
 public:
     // Copy DOM to another document
-    static bool Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
+    static bool Copy(const QDomElement & mcrSourceDOM,
+        QDomElement & mrDOMParent,
+        const bool mcIgnoreSourceTagName = false);
+
+    // Copy HTML DOM to another document
+    static bool CopyHTML(const QDomElement & mcrDOMSource,
+        QDomElement & mrDOMParent,
         const bool mcIgnoreSourceTagName = false);
 
     // Parse XML and append DOM to parent
     static bool AppendXML(QDomElement & mrParent, const QString & mcrXML);
 
     // All attributes
-    static QSet < QString > GetAllAttributes(QDomElement & mrParent);
+    static QSet < QString > GetAllAttributes(const QDomElement & mrParent);
 
     // Strip leding DOCTYPE tag
     static QString StripDocType(QString mXML);
 
     // Check for proper nesting
     static QString CheckProperNesting(const QString & mcrXML);
+
+    // Get text components
+    static QString GetText(const QDomElement & mcrElement);
+private:
+    static void GetText_Rec(const QDomElement & mcrElement,
+        QStringList & mrText);
+
+public:
+    // Get HTML components
+    static QString GetHTML(const QDomElement & mcrElement);
+private:
+    static void GetHTML_Rec(const QDomElement & mcrElement,
+        QStringList & mrHTML);
+
+public:
+    // Get known HTML tags
+    static QSet < QString > GetKnownHTMLTags();
 };
 
 #endif

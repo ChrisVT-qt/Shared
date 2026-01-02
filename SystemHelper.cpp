@@ -19,13 +19,17 @@
 // Class implementation file
 
 // Project includes
-#include "SystemHelper.h"
 #include "CallTracer.h"
+#include "MessageLogger.h"
+#include "SystemHelper.h"
 
 // Qt includes
 #include <QDebug>
+#include <QEventLoop>
 #include <QFileInfo>
 #include <QMimeDatabase>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QPalette>
 
 // Platform-specific includes: Apple
@@ -69,6 +73,43 @@ SystemHelper::~SystemHelper()
     
 
 // ================================================================== Functions
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Download file
+QByteArray SystemHelper::Download(const QString & mcrURL)
+{
+    CALL_IN(QString("mcrURL=%1")
+        .arg(CALL_SHOW(mcrURL)));
+
+    // Download image
+    QNetworkAccessManager network_manager;
+    QEventLoop event_loop;
+    connect (&network_manager, &QNetworkAccessManager::finished,
+        &event_loop, &QEventLoop::quit);
+    QNetworkReply * reply = network_manager.get(QNetworkRequest(mcrURL));
+    event_loop.exec();
+
+    // Check if error occurred
+    if (reply -> error() != QNetworkReply::NoError)
+    {
+        delete reply;
+        const QString reason =
+            tr("An error occurred while downloading an image from \"%1\".")
+                .arg(mcrURL);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QByteArray();
+    }
+
+    // No error
+    QByteArray ret = reply -> readAll();
+    delete reply;
+
+    CALL_OUT("");
+    return ret;
+}
 
 
 

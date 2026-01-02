@@ -406,16 +406,16 @@ void XMLHelper::PrettyPrintXML_Rec(const QDomElement mcElement,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Copy DOM to another document
-bool XMLHelper::Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
-    const bool mcIgnoreSourceTagName)
+bool XMLHelper::Copy(const QDomElement & mcrSourceDOM,
+    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName)
 {
     CALL_IN(QString("mcSourceDOM=%1, mDOMParent=%2, mcIgnoreSourceTagName=%3")
-        .arg(CALL_SHOW(mcSourceDOM),
-             CALL_SHOW(mDOMParent),
+        .arg(CALL_SHOW(mcrSourceDOM),
+             CALL_SHOW(mrDOMParent),
              CALL_SHOW(mcIgnoreSourceTagName)));
 
     // Check if we have a source
-    if (mcSourceDOM.isNull())
+    if (mcrSourceDOM.isNull())
     {
         const QString reason = tr("Null DOM provided as source.");
         MessageLogger::Error(CALL_METHOD, reason);
@@ -424,21 +424,21 @@ bool XMLHelper::Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
     }
 
     // Create this tag in destination parent
-    QDomDocument dest_doc = mDOMParent.ownerDocument();
+    QDomDocument dest_doc = mrDOMParent.ownerDocument();
     QDomElement dom_element;
     if (!mcIgnoreSourceTagName)
     {
-        dom_element = dest_doc.createElement(mcSourceDOM.tagName());
-        mDOMParent.appendChild(dom_element);
+        dom_element = dest_doc.createElement(mcrSourceDOM.tagName());
+        mrDOMParent.appendChild(dom_element);
     } else
     {
-        dom_element = mDOMParent;
+        dom_element = mrDOMParent;
     }
 
     // Attributes
     if (!mcIgnoreSourceTagName)
     {
-        QDomNamedNodeMap all_attributes = mcSourceDOM.attributes();
+        QDomNamedNodeMap all_attributes = mcrSourceDOM.attributes();
         for (int attr_index = 0;
              attr_index < all_attributes.count();
              attr_index++)
@@ -451,7 +451,7 @@ bool XMLHelper::Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
     }
 
     // Child nodes
-    for (QDomNode dom_child = mcSourceDOM.firstChild();
+    for (QDomNode dom_child = mcrSourceDOM.firstChild();
          !dom_child.isNull();
          dom_child = dom_child.nextSibling())
     {
@@ -466,6 +466,107 @@ bool XMLHelper::Copy(const QDomElement mcSourceDOM, QDomElement mDOMParent,
         {
             const QDomElement dom_source_element = dom_child.toElement();
             const bool success = Copy(dom_source_element, dom_element);
+            if (!success)
+            {
+                // Error has been reported elsewhere.
+                CALL_OUT("");
+                return false;
+            }
+        }
+
+        // Ignore all other nodes
+    }
+
+    CALL_OUT("");
+    return true;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Copy HTML DOM to another document
+bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
+    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName)
+{
+    CALL_IN(QString("mcSourceDOM=%1, mDOMParent=%2, mcIgnoreSourceTagName=%3")
+        .arg(CALL_SHOW(mcrSourceDOM),
+             CALL_SHOW(mrDOMParent),
+             CALL_SHOW(mcIgnoreSourceTagName)));
+
+    // It's not going to change
+    static QSet < QString > known_html_tags = GetKnownHTMLTags();
+
+    // Check if we have a source
+    if (mcrSourceDOM.isNull())
+    {
+        const QString reason = tr("Null DOM provided as source.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return false;
+    }
+
+    // Create this tag in destination parent
+    QDomDocument dest_doc = mrDOMParent.ownerDocument();
+    QDomElement dom_element;
+    if (!mcIgnoreSourceTagName)
+    {
+        const QString tag = mcrSourceDOM.tagName();
+        if (!known_html_tags.contains(tag))
+        {
+            const QString reason =
+                tr("Top level tag <%1> is not a valid HTML tag.")
+                .arg(tag);
+            MessageLogger::Error(CALL_METHOD, reason);
+            CALL_OUT(reason);
+            return false;
+        }
+        dom_element = dest_doc.createElement(tag);
+        mrDOMParent.appendChild(dom_element);
+    } else
+    {
+        dom_element = mrDOMParent;
+    }
+
+    // Attributes
+    if (!mcIgnoreSourceTagName)
+    {
+        QDomNamedNodeMap all_attributes = mcrSourceDOM.attributes();
+        for (int attr_index = 0;
+             attr_index < all_attributes.count();
+             attr_index++)
+        {
+            const QDomAttr dom_attribute =
+                all_attributes.item(attr_index).toAttr();
+            dom_element.setAttribute(dom_attribute.name(),
+                dom_attribute.value());
+        }
+    }
+
+    // Child nodes
+    for (QDomNode dom_child = mcrSourceDOM.firstChild();
+         !dom_child.isNull();
+         dom_child = dom_child.nextSibling())
+    {
+        if (dom_child.isText())
+        {
+            const QString text = dom_child.toText().data();
+            QDomText dom_text = dest_doc.createTextNode(text);
+            dom_element.appendChild(dom_text);
+            continue;
+        }
+        if (dom_child.isElement())
+        {
+            const QDomElement dom_source_element = dom_child.toElement();
+            const QString tag = dom_source_element.tagName();
+            if (!known_html_tags.contains(tag))
+            {
+                const QString reason =  tr("Tag <%1> is not a valid HTML tag.")
+                    .arg(tag);
+                MessageLogger::Error(CALL_METHOD, reason);
+                CALL_OUT(reason);
+                return false;
+            }
+            const bool success = CopyHTML(dom_source_element, dom_element);
             if (!success)
             {
                 // Error has been reported elsewhere.
@@ -544,7 +645,7 @@ bool XMLHelper::AppendXML(QDomElement & mrParent, const QString & mcrXML)
 
 ///////////////////////////////////////////////////////////////////////////////
 // All attributes
-QSet < QString > XMLHelper::GetAllAttributes(QDomElement & mrElement)
+QSet < QString > XMLHelper::GetAllAttributes(const QDomElement & mrElement)
 {
     CALL_IN(QString("mrElement=%1")
         .arg(CALL_SHOW(mrElement)));
@@ -685,3 +786,175 @@ QString XMLHelper::CheckProperNesting(const QString & mcrXML)
     return QString();
 }
 
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get text components
+QString XMLHelper::GetText(const QDomElement & mcrElement)
+{
+    CALL_IN(QString("mcrElement=%1")
+        .arg(CALL_SHOW(mcrElement)));
+
+    // Check if we actually have an element
+    if (mcrElement.isNull())
+    {
+        const QString reason = tr("No element provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QString();
+    }
+
+    // Tranverse DOM
+    QStringList text_parts;
+    GetText_Rec(mcrElement, text_parts);
+    const QString text = text_parts.join("");
+
+    CALL_OUT("");
+    return text;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get text components
+void XMLHelper::GetText_Rec(const QDomElement & mcrElement,
+    QStringList & mrText)
+{
+    CALL_IN(QString("mcrElement=%1")
+        .arg(CALL_SHOW(mcrElement)));
+
+    for (QDomNode dom_child = mcrElement.firstChild();
+         !dom_child.isNull();
+         dom_child = dom_child.nextSibling())
+    {
+        if (dom_child.isText())
+        {
+            mrText << dom_child.toText().data();
+            continue;
+        }
+        if (!dom_child.isElement())
+        {
+            continue;
+        }
+        QDomElement dom_child_element = dom_child.toElement();
+        GetText_Rec(dom_child_element, mrText);
+    }
+
+    CALL_OUT("");
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get HTML components
+QString XMLHelper::GetHTML(const QDomElement & mcrElement)
+{
+    CALL_IN(QString("mcrElement=%1")
+        .arg(CALL_SHOW(mcrElement)));
+
+    // Check if we actually have an element
+    if (mcrElement.isNull())
+    {
+        const QString reason = tr("No element provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QString();
+    }
+
+    // Tranverse DOM
+    QStringList html_parts;
+    GetHTML_Rec(mcrElement, html_parts);
+    const QString html = html_parts.join("");
+
+    CALL_OUT("");
+    return html;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get HTML components
+void XMLHelper::GetHTML_Rec(const QDomElement & mcrElement,
+    QStringList & mrHTML)
+{
+    CALL_IN(QString("mcrElement=%1")
+        .arg(CALL_SHOW(mcrElement)));
+
+    static QSet < QString > known_html_tags = GetKnownHTMLTags();
+
+    for (QDomNode dom_child = mcrElement.firstChild();
+         !dom_child.isNull();
+         dom_child = dom_child.nextSibling())
+    {
+        if (dom_child.isText())
+        {
+            mrHTML << dom_child.toText().data();
+            continue;
+        }
+        if (!dom_child.isElement())
+        {
+            continue;
+        }
+        QDomElement dom_child_element = dom_child.toElement();
+        const QString tag = dom_child_element.tagName();
+        if (known_html_tags.contains(tag))
+        {
+            // Open tag (with attributes)
+            QString opening = "<" + tag;
+            const QSet < QString > attributes = GetAllAttributes(mcrElement);
+            for (auto attr_iterator = attributes.begin();
+                 attr_iterator != attributes.end();
+                 attr_iterator++)
+            {
+                const QString & attribute = *attr_iterator;
+                opening += QString(" %1=\"%2\"")
+                    .arg(attribute,
+                         mcrElement.attribute(attribute));
+            }
+            opening += "/>";
+            mrHTML << opening;
+        }
+
+        // Process child elements regardless of being HTML tags or not
+        GetHTML_Rec(dom_child_element, mrHTML);
+
+        // Close the tag we opened above
+        const QString closing = QString("</%1>")
+            .arg(tag);
+        mrHTML << closing;
+    }
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get known HTML tags
+QSet < QString > XMLHelper::GetKnownHTMLTags()
+{
+    CALL_IN("");
+
+    const QSet < QString > known_tags({
+        "a",
+        "b",
+        "br",
+        "code",
+        "div",
+        "font",
+        "hr",
+        "i",
+        "li",
+        "ol",
+        "p",
+        "span",
+        "table",
+        "td",
+        "tr",
+        "u",
+        "ul",
+        "pre",
+        "style"});
+
+    CALL_OUT("");
+    return known_tags;
+}

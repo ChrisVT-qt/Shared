@@ -4,18 +4,18 @@
 // Project includes
 #include "CallTracer.h"
 #include "Geocode.h"
-#include "secrets/GoogleSecrets.h"
+#include "Map.h"
 #include "MessageLogger.h"
+#include "secrets/GoogleSecrets.h"
 
 // Qt includes
 #include <QDebug>
 #include <QDomElement>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QObject>
-
-// System include
-#include <cmath>
 
 
 
@@ -30,44 +30,10 @@ Geocode::Geocode()
     CALL_IN("");
     REGISTER_INSTANCE;
 
-    // Initialize IDs
-    m_NextSearchId = 0;
-    m_NextResultId = 0;
-    
-    // Net access
-    m_DownloadManager = new QNetworkAccessManager(this);
-	connect (m_DownloadManager, SIGNAL(finished(QNetworkReply *)),
-	    this, SLOT(RequestCompleted(QNetworkReply *)));
-	connect (m_DownloadManager,
-	    SIGNAL(sslErrors(QNetworkReply *, const QList < QSslError >)),
-	    this, 
-	    SLOT(SSLErrorOccurred(QNetworkReply *, const QList < QSslError >)));
+    // Nothing to do
 
     CALL_OUT("");
 }
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Instance
-Geocode * Geocode::Instance()
-{
-    CALL_IN("");
-
-    if (!m_Instance)
-    {
-        m_Instance = new Geocode();
-    }
-    
-    CALL_OUT("");
-    return m_Instance;
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Instance
-Geocode * Geocode::m_Instance = nullptr;
 
 
 
@@ -84,17 +50,51 @@ Geocode::~Geocode()
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Invalid search ID
-const int Geocode::INVALID_ID = -1;
-
-
 	
 // ===================================================================== Access
 
 
+///////////////////////////////////////////////////////////////////////////////
+// Convert geoinformation type to human readable form
+QString Geocode::ToHumanReadable(
+    const Geocode::GeoInformationType mcInformation)
+{
+    CALL_IN(QString("mcInformation=%1")
+        .arg("..."));
 
+    // Set up mapper
+    static QHash < GeoInformationType, QString > information_mapper;
+    if (information_mapper.isEmpty())
+    {
+        information_mapper[Info_FormattedAddress] = "formatted address";
+        information_mapper[Info_Locality] = "locality";
+        information_mapper[Info_AdminLevel1] = "admin level 1";
+        information_mapper[Info_AdminLevel2] = "admin level 2";
+        information_mapper[Info_AdminLevel3] = "admin level 3";
+        information_mapper[Info_PostalCode] = "postal code";
+        information_mapper[Info_Country] = "country";
+        information_mapper[Info_Longitude] = "longitude";
+        information_mapper[Info_PrettyLongitude] = "longitude (pretty)";
+        information_mapper[Info_Latitude] = "latitude";
+        information_mapper[Info_PrettyLatitude] = "latitude (pretty)";
+    }
+
+    if (information_mapper.contains(mcInformation))
+    {
+        CALL_OUT("");
+        return information_mapper[mcInformation];
+    } else
+    {
+        const QString reason = tr("Unknown information type.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QString();
+    }
+
+    // We never get here
+}
+
+#if 0
 ///////////////////////////////////////////////////////////////////////////////
 // Search
 int Geocode::SearchAddress(const QString mcAddress)
@@ -130,21 +130,18 @@ int Geocode::SearchAddress(const QString mcAddress)
     CALL_OUT("");
     return this_search_id;
 }
+#endif
 
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Get address for coordinates
-int Geocode::SearchCoordinates(const double mcLongitude,
-    const double mcLatitude)
+QHash < Geocode::GeoInformationType, QString > Geocode::GetGeoInformation(
+    const double mcLongitude, const double mcLatitude)
 {
     CALL_IN(QString("mcLongitude=%1, mcLatitude=%2")
         .arg(CALL_SHOW(mcLongitude),
              CALL_SHOW(mcLatitude)));
-
-    // Search ID
-    int this_search_id = m_NextSearchId;
-    m_NextSearchId++;
 
     // Create request
     const QString request_text = QString("https://maps.googleapis.com/maps/"
@@ -154,226 +151,37 @@ int Geocode::SearchCoordinates(const double mcLongitude,
         .arg(mcLatitude)
         .arg(mcLongitude)
         .arg(GOOGLE_API_KEY);
-    
-    // Read from URL
-    QNetworkRequest request;
-    request.setUrl(QUrl(request_text));
-    request.setAttribute(QNetworkRequest::User, this_search_id);
-    m_DownloadManager -> get(request);
-    
-    // Done
-    CALL_OUT("");
-    return this_search_id;
-}
 
+    // Obtain information
+    QNetworkAccessManager network_manager;
+    QEventLoop event_loop;
+    connect (&network_manager, &QNetworkAccessManager::finished,
+        &event_loop, &QEventLoop::quit);
+    QNetworkReply * reply = network_manager.get(QNetworkRequest(request_text));
+    event_loop.exec();
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Coordinates
-QPair < double, double > Geocode::GetCoordinates(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToLongitude.contains(mcId) ||
-        !m_ResultIdToLatitude.contains(mcId))
+    // Check if error occurred
+    if (reply -> error() != QNetworkReply::NoError)
     {
-        // No or incomplete data
-        const QString reason = tr("No coordinates for results ID %1.")
-            .arg(QString::number(mcId));
+        delete reply;
+        const QString reason =
+            tr("An error occurred while downloading geo information image "
+                "from \"%1\".")
+                .arg(request_text);
         MessageLogger::Error(CALL_METHOD, reason);
         CALL_OUT(reason);
-        return QPair < double, double >(NAN, NAN);
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return QPair < double, double >(m_ResultIdToLongitude[mcId],
-        m_ResultIdToLatitude[mcId]);
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Formatted address
-QString Geocode::GetFormattedAddress(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToFormattedAddress.contains(mcId))
-    {
-        CALL_OUT("");
-        return QString();
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return m_ResultIdToFormattedAddress[mcId];
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Locality
-QString Geocode::GetLocality(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToLocality.contains(mcId))
-    {
-        CALL_OUT("");
-        return QString();
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return m_ResultIdToLocality[mcId];
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Administrative Level 2
-QString Geocode::GetAdminLevel2(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToAdminLevel2.contains(mcId))
-    {
-        CALL_OUT("");
-        return QString();
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return m_ResultIdToAdminLevel2[mcId];
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Administrative Level 1
-QString Geocode::GetAdminLevel1(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToAdminLevel1.contains(mcId))
-    {
-        CALL_OUT("");
-        return QString();
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return m_ResultIdToAdminLevel1[mcId];
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Country
-QString Geocode::GetCountry(const int mcId)
-{
-    CALL_IN(QString("mcId=%1")
-        .arg(CALL_SHOW(mcId)));
-
-    if (!m_ResultIdToCountry.contains(mcId))
-    {
-        CALL_OUT("");
-        return QString();
-    }
-    
-    // Successful
-    CALL_OUT("");
-    return m_ResultIdToCountry[mcId];
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Remove search results from cache
-void Geocode::DeleteSearch(const int mcSearchId)
-{
-    CALL_IN(QString("mcSearchId=%1")
-        .arg(CALL_SHOW(mcSearchId)));
-
-    if (!m_SearchIdToResultIds.contains(mcSearchId))
-    {
-        // No data
-        const QString reason = tr("Unknown search ID %1.")
-            .arg(QString::number(mcSearchId));
-        MessageLogger::Error(CALL_METHOD, reason);
-        CALL_OUT(reason);
-        return;
-    }
-    
-    // Delete results
-    for (const int result_id : m_SearchIdToResultIds[mcSearchId])
-    {
-        m_ResultIdToFormattedAddress.remove(result_id);
-        m_ResultIdToLocality.remove(result_id);
-        m_ResultIdToPostalCode.remove(result_id);
-        m_ResultIdToAdminLevel3.remove(result_id);
-        m_ResultIdToAdminLevel2.remove(result_id);
-        m_ResultIdToAdminLevel1.remove(result_id);
-        m_ResultIdToCountry.remove(result_id);
-        m_ResultIdToLongitude.remove(result_id);
-        m_ResultIdToLatitude.remove(result_id);
+        return QHash < GeoInformationType, QString >();
     }
 
-    CALL_OUT("");
-}
+    // No error
+    QString xml(reply -> readAll());
+    delete reply;
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Net request completed
-void Geocode::RequestCompleted(QNetworkReply * mpReply)
-{
-    // !!! Not tracking CALL_IN/CALL_OUT; CallTracer isn't thread-safe.
-
-    // Get content
-    QNetworkRequest request = mpReply -> request();
-    const int search_id = request.attribute(QNetworkRequest::User).toInt();
-    
-    // Get data
-    QByteArray data = mpReply -> readAll();
-    mpReply -> deleteLater();
-    
-    // Parse
-    ParseXml(QString(data), search_id);
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// SSL errors
-void Geocode::SSLErrorOccurred(QNetworkReply * mpReply,
-    const QList < QSslError > mcErrors)
-{
-    // !!! Not tracking CALL_IN/CALL_OUT; CallTracer isn't thread-safe.
-
-    Q_UNUSED(mcErrors);
-    
-    // Ignore - We know what we're doing here,
-    mpReply -> ignoreSslErrors();
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Parsing XML response
-void Geocode::ParseXml(const QString mcXml, const int mcSearchId)
-{
-    // !!! Not tracking CALL_IN/CALL_OUT; CallTracer isn't thread-safe.
+    // Decode reply
 
     // XML schema explained at
     // https://developers.google.com/maps/documentation/geocoding/
-    
+
     // <GeocodeResponse>
     //   <status>OK</status>
     //   <result>
@@ -421,9 +229,9 @@ void Geocode::ParseXml(const QString mcXml, const int mcSearchId)
     //     ...
     //   </result>
     // </GeocodeResponse>
-    
+
     // or
-    
+
     // <GeocodeResponse>
     //   <status>REQUEST_DENIED</status>
     //   <error_message>The provided API key is invalid.</error_message>
@@ -431,94 +239,86 @@ void Geocode::ParseXml(const QString mcXml, const int mcSearchId)
 
 
     // Initialize results
-    m_SearchIdToResultIds[mcSearchId] = QList < int >();
-    
+    QHash < GeoInformationType, QString > geo;
+
     // Parse XML DOM
-    QDomDocument xml;
-    const QDomDocument::ParseResult result = xml.setContent(mcXml);
+    QDomDocument doc;
+    const QDomDocument::ParseResult result = doc.setContent(xml);
     if (!result)
     {
-        const QString reason =
-            tr("Error parsing XML response: \"%1\". This should be a rare problem.")
-                .arg(result.errorMessage);
+        const QString reason = tr("Error parsing XML response: \"%1\". "
+            "This should be a rare problem.")
+            .arg(result.errorMessage);
         MessageLogger::Error(CALL_METHOD, reason);
-        emit SearchCompleted(mcSearchId, QList < int >());
-        return;
+        return QHash < GeoInformationType, QString >();
     }
-    
-    QDomElement root = xml.documentElement();
-    if (root.tagName() != "GeocodeResponse")
+
+    QDomElement dom_root = doc.documentElement();
+    if (dom_root.tagName() != "GeocodeResponse")
     {
         const QString reason = tr("Root tag is not <GeocodeResponse>.");
         MessageLogger::Error(CALL_METHOD, reason);
-        emit SearchCompleted(mcSearchId, QList < int >());
-        return;
+        return QHash < GeoInformationType, QString >();
     }
 
     // Check status
-    QDomElement status = root.firstChildElement("status");
+    QDomElement status = dom_root.firstChildElement("status");
     if (status.isNull())
     {
         const QString reason =
             tr("Root tag <GeocodeResponse> is missing a <status> tag.");
         MessageLogger::Error(CALL_METHOD, reason);
-        emit SearchCompleted(mcSearchId, QList < int >());
-        return;
+        return QHash < GeoInformationType, QString >();
     }
     const QString status_text = status.text();
     if (status_text != "OK")
     {
-        QDomElement error_message = root.firstChildElement("error_message");
-        if (error_message.isNull())
+        QDomElement dom_error_message =
+            dom_root.firstChildElement("error_message");
+        if (dom_error_message.isNull())
         {
             const QString reason =
                 tr("Root tag <GeocodeResponse> is missing a <error_message> "
                     "tag even though there was an error.");
             MessageLogger::Error(CALL_METHOD, reason);
-            emit SearchCompleted(mcSearchId, QList < int >());
-            return;
+            return QHash < GeoInformationType, QString >();
         }
-        const QString error_message_text = error_message.text();
-        
+        const QString error_message_text = dom_error_message.text();
+
         const QString reason = tr("Request failed with status \"%1\": %2.")
             .arg(status_text,
                 error_message_text);
         MessageLogger::Error(CALL_METHOD, reason);
-        emit SearchCompleted(mcSearchId, QList < int >());
-        return;
+        return QHash < GeoInformationType, QString >();
     }
-    
+
     // Loop results
-    for (QDomElement result = root.firstChildElement("result");
-        !result.isNull();
-        result = result.nextSiblingElement("result"))
+    for (QDomElement dom_result = dom_root.firstChildElement("result");
+        !dom_result.isNull();
+        dom_result = dom_result.nextSiblingElement("result"))
     {
-        // Result ID
-        const int result_id = m_NextResultId;
-        m_NextResultId++;
-        
         // We ignore <type>
-        
+
         // Formatted address
-        QDomElement formatted_address = 
-            result.firstChildElement("formatted_address");
-        if (formatted_address.isNull())
+        QDomElement dom_formatted_address =
+            dom_result.firstChildElement("formatted_address");
+        if (dom_formatted_address.isNull())
         {
             const QString reason = tr("No <formatted_address> tag.");
             MessageLogger::Error(CALL_METHOD, reason);
             continue;
         }
-        m_ResultIdToFormattedAddress[result_id] = formatted_address.text();
+        geo[Info_FormattedAddress] = dom_formatted_address.text();
 
         // Loop address components
         for (QDomElement component =
-                result.firstChildElement("address_component");
+                dom_result.firstChildElement("address_component");
             !component.isNull();
             component =
                 component.nextSiblingElement("address_component"))
         {
             // Long name
-            QDomElement long_name = 
+            QDomElement long_name =
                 component.firstChildElement("long_name");
             if (long_name.isNull())
             {
@@ -540,86 +340,94 @@ void Geocode::ParseXml(const QString mcXml, const int mcSearchId)
                 }
                 if (type.text() == "locality")
                 {
-                    m_ResultIdToLocality[result_id] = long_name_text;
+                    geo[Info_Locality] = long_name_text;
                     continue;
                 }
                 if (type.text() == "administrative_area_level_1")
                 {
-                    m_ResultIdToAdminLevel1[result_id] = long_name_text;
+                    geo[Info_AdminLevel1] = long_name_text;
                     continue;
                 }
                 if (type.text() == "administrative_area_level_2")
                 {
-                    m_ResultIdToAdminLevel2[result_id] = long_name_text;
+                    geo[Info_AdminLevel2] = long_name_text;
                     continue;
                 }
                 if (type.text() == "administrative_area_level_3")
                 {
-                    m_ResultIdToAdminLevel3[result_id] = long_name_text;
+                    geo[Info_AdminLevel3] = long_name_text;
                     continue;
                 }
                 if (type.text() == "postal_code")
                 {
-                    m_ResultIdToPostalCode[result_id] = long_name_text;
+                    geo[Info_PostalCode] = long_name_text;
                     continue;
                 }
                 if (type.text() == "country")
                 {
-                    m_ResultIdToCountry[result_id] = long_name_text;
+                    geo[Info_Country] = long_name_text;
                     continue;
                 }
-                
+
                 // Ignore remaining types
             }
         }
-        
+
         // Geometry
-        QDomElement geometry = result.firstChildElement("geometry");
-        if (geometry.isNull())
+        QDomElement dom_geometry = dom_result.firstChildElement("geometry");
+        if (dom_geometry.isNull())
         {
             const QString reason = tr("No <geometry> tag.");
             MessageLogger::Error(CALL_METHOD, reason);
             continue;
         }
-        
+
         // Location
-        QDomElement location = geometry.firstChildElement("location");
-        if (location.isNull())
+        QDomElement dom_location = dom_geometry.firstChildElement("location");
+        if (dom_location.isNull())
         {
             const QString reason = tr("No <location> tag.");
             MessageLogger::Error(CALL_METHOD, reason);
             continue;
         }
-        
+
         // Latitude
-        QDomElement lat = location.firstChildElement("lat");
-        if (lat.isNull())
+        QDomElement dom_lat = dom_location.firstChildElement("lat");
+        if (dom_lat.isNull())
         {
             const QString reason = tr("No <lat> tag.");
             MessageLogger::Error(CALL_METHOD, reason);
             continue;
         }
-        m_ResultIdToLatitude[result_id] = lat.text().toDouble();
-        
+        const double latitude = dom_lat.text().toDouble();
+        geo[Info_Latitude] = QString::number(latitude, 'f', 10);
+        geo[Info_PrettyLatitude] = Map::ConvertDoubleToLatitude(latitude);
+
         // Longitude
-        QDomElement lng = location.firstChildElement("lng");
-        if (lng.isNull())
+        QDomElement dom_lng = dom_location.firstChildElement("lng");
+        if (dom_lng.isNull())
         {
             const QString reason = tr("No <lng> tag.");
             MessageLogger::Error(CALL_METHOD, reason);
             continue;
         }
-        m_ResultIdToLongitude[result_id] = lng.text().toDouble();
+        const double longitude = dom_lng.text().toDouble();
+        geo[Info_Longitude] = QString::number(longitude, 'f', 10);
+        geo[Info_PrettyLongitude] = Map::ConvertDoubleToLongitude(longitude);
 
         // We ignore <location_type>
         // We ignore <viewport>
         // We ignore <bounds>
 
-        m_SearchIdToResultIds[mcSearchId] << result_id;
-        
         // Next result
+
+        // !!We stick with the first result
+        break;
     }
 
-    // Done.
-    emit SearchCompleted(mcSearchId, m_SearchIdToResultIds[mcSearchId]);
+    CALL_OUT("");
+    return geo;
 }
+
+
+

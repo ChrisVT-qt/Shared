@@ -23,76 +23,37 @@ private:
 	Geocode();
 
 public:
-    // Instance
-    static Geocode * Instance();
-private:
-    static Geocode * m_Instance;
-
-public:
 	// Destructor
 	virtual ~Geocode();
-	
-	// Invalid search ID
-	static const int INVALID_ID;
-
-private:
-    QNetworkAccessManager * m_DownloadManager;
 	
     
 	
 	// ================================================================= Access
 public:
-    // Search
-	int SearchAddress(const QString mcAddress);
-	
-	// Get address for coordinates
-	int SearchCoordinates(const double mcLongitude, const double mcLatitude);
-	
-	// Coordinates
-	QPair < double, double > GetCoordinates(const int mcId);
-	
-	// Parts of the location
-	QString GetFormattedAddress(const int mcId);
-	QString GetLocality(const int mcId);
-	QString GetAdminLevel2(const int mcId);
-	QString GetAdminLevel1(const int mcId);
-	QString GetCountry(const int mcId);
+    enum GeoInformationType {
+        Info_FormattedAddress,
+        Info_Locality,
+        Info_AdminLevel1,
+        Info_AdminLevel2,
+        Info_AdminLevel3,
+        Info_PostalCode,
+        Info_Country,
+        Info_Longitude,
+        Info_PrettyLongitude,
+        Info_Latitude,
+        Info_PrettyLatitude
+    };
+    static QString ToHumanReadable(const GeoInformationType mcInformation);
 
-	// Remove search results from cache
-	void DeleteSearch(const int mcSearchId);
-	
-private slots:
-    // Net request completed
-    void RequestCompleted(QNetworkReply * mpReply);
-    
-    // SSL errors
-    void SSLErrorOccurred(QNetworkReply * mpReply,
-        const QList < QSslError > mcErrors);
-    
-private:
-    // Parsing XML response
-    void ParseXml(const QString mcXml, int mcSearchId);
+#if 0
+    // Search address
+    static QHash < GeoInformationType, QString > SearchAddress(
+        const QString mcAddress);
+#endif
 
-    // Search ID
-    int m_NextSearchId;
-    QHash < int, QList < int > > m_SearchIdToResultIds;
-    
-    // Cache
-    int m_NextResultId;
-	QHash < int, QString > m_ResultIdToFormattedAddress;
-	QHash < int, QString > m_ResultIdToLocality;
-	QHash < int, QString > m_ResultIdToPostalCode;
-	QHash < int, QString > m_ResultIdToAdminLevel3;
-	QHash < int, QString > m_ResultIdToAdminLevel2;
-	QHash < int, QString > m_ResultIdToAdminLevel1;
-	QHash < int, QString > m_ResultIdToCountry;
-	QHash < int, double > m_ResultIdToLongitude;
-	QHash < int, double > m_ResultIdToLatitude;
-	
-signals:
-    // Search completed
-    void SearchCompleted(const int mcSearchId, 
-        const QList < int > mcResultIds);
+    // Get information about a location
+    static QHash < GeoInformationType, QString > GetGeoInformation(
+        const double mcLongitude, const double mcLatitude);
 };
 
 #endif
