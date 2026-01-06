@@ -549,7 +549,8 @@ bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
     {
         if (dom_child.isText())
         {
-            const QString text = dom_child.toText().data();
+            QString text = dom_child.toText().data();
+            text = EncodeHTMLEntities(text);
             QDomText dom_text = dest_doc.createTextNode(text);
             dom_element.appendChild(dom_text);
             continue;
@@ -580,6 +581,21 @@ bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
 
     CALL_OUT("");
     return true;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Encode HTML entities for XML
+QString XMLHelper::EncodeHTMLEntities(QString mHTMLText)
+{
+    CALL_IN(QString("mHTMLText=%1")
+        .arg(CALL_SHOW(mHTMLText)));
+
+    mHTMLText.replace("&#039;", "'");
+
+    CALL_OUT("");
+    return mHTMLText;
 }
 
 

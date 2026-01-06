@@ -75,6 +75,9 @@ public:
         QDomElement & mrDOMParent,
         const bool mcIgnoreSourceTagName = false);
 
+    // Encode HTML entities for XML
+    static QString EncodeHTMLEntities(QString mHTMLText);
+
     // Parse XML and append DOM to parent
     static bool AppendXML(QDomElement & mrParent, const QString & mcrXML);
 
