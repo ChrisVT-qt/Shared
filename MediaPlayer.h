@@ -69,6 +69,7 @@ protected:
     QWidget * m_PlayListContainerWidget;
     QVBoxLayout * m_PlayListLayout;
     QButtonGroup * m_PlayList_RepeatMode;
+    QButtonGroup * m_PlayList_TitleEndMode;
 
 private slots:
     void StartDragFrame();
@@ -165,19 +166,34 @@ private slots:
     void Update_PlayList();
 
 public:
+    // Repeat mode
     enum RepeatMode {
         Repeat_None,
         Repeat_Single,
         Repeat_All
     };
-
-    // Repeat mode
+    QString ToHumanReadable(const RepeatMode mcMode) const;
 public slots:
-    void SetRepeatMode(const int mcNewState);
+    void SetRepeatMode(const MediaPlayer::RepeatMode mcNewState);
 public:
     RepeatMode GetRepeatMode() const;
 private:
     RepeatMode m_RepeatMode;
+
+public:
+    enum TitleEndMode {
+        TitleEnd_Continue,
+        TitleEnd_Stop
+    };
+    QString ToHumanReadable(const TitleEndMode mcMode) const;
+
+    // End of title mode
+public slots:
+    void SetTitleEndMode(const MediaPlayer::TitleEndMode mcNewState);
+public:
+    TitleEndMode GetTitleEndMode() const;
+private:
+    TitleEndMode m_TitleEndMode;
 
 
 

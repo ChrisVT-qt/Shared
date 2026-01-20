@@ -27,6 +27,7 @@
 #include <QPainter>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QSplitter>
 #include <QStyle>
 #include <QVBoxLayout>
 #include <QVideoFrame>
@@ -119,12 +120,17 @@ void MediaPlayer::InitGUI()
     QVBoxLayout * layout = new QVBoxLayout();
     setLayout(layout);
 
+    QSplitter * splitter = new QSplitter(Qt::Vertical);
+    layout -> addWidget(splitter);
+
 
     // == Video/cover art
+    QWidget * top_widget = new QWidget(this);
+    splitter -> addWidget(top_widget);
 
     // Top layout
-    QHBoxLayout * top_layout = new QHBoxLayout();
-    layout -> addLayout(top_layout);
+    QVBoxLayout * top_layout = new QVBoxLayout();
+    top_widget -> setLayout(top_layout);
 
     // Media
     m_Media = new QMediaPlayer(this);
@@ -165,7 +171,7 @@ void MediaPlayer::InitGUI()
 
     // == Controls
     QHBoxLayout * controls_layout = new QHBoxLayout();
-    layout -> addLayout(controls_layout);
+    top_layout -> addLayout(controls_layout);
 
     m_PreviousButton = new QToolButton(this);
     m_PreviousButton -> setIcon(
@@ -189,6 +195,7 @@ void MediaPlayer::InitGUI()
     controls_layout -> addWidget(m_NextButton);
 
     m_CurrentTime = new QLabel(this);
+    m_CurrentTime -> setFixedWidth(65);
     controls_layout -> addWidget(m_CurrentTime);
 
     m_TimeSlider = new QSlider(this);
@@ -202,6 +209,7 @@ void MediaPlayer::InitGUI()
     controls_layout -> addWidget(m_TimeSlider);
 
     m_MaxTime = new QLabel(this);
+    m_MaxTime -> setFixedWidth(65);
     controls_layout -> addWidget(m_MaxTime);
 
     controls_layout -> addSpacing(10);
@@ -217,7 +225,7 @@ void MediaPlayer::InitGUI()
     m_Volume -> setOrientation(Qt::Horizontal);
     m_Volume -> setRange(0, 100);
     m_Volume -> setValue(DEFAULT_VOLUME * 100);
-    m_Volume -> setFixedWidth(50);
+    m_Volume -> setFixedWidth(100);
     connect (m_Volume, &QSlider::valueChanged,
         this, &MediaPlayer::SetVolume);
     controls_layout -> addWidget(m_Volume);
@@ -235,49 +243,93 @@ void MediaPlayer::InitGUI()
 
 
     // == Playlist
+    QWidget * bottom_widget = new QWidget(this);
+    splitter -> addWidget(bottom_widget);
+    QVBoxLayout * pl_layout = new QVBoxLayout();
+    bottom_widget -> setLayout(pl_layout);
+
     m_PlayList = new QWidget(this);
     QVBoxLayout * playlist_layout = new QVBoxLayout();
     m_PlayList -> setLayout(playlist_layout);
+
     QScrollArea * scroll_area = new QScrollArea();
     m_PlayListContainerWidget = new QWidget();
     scroll_area -> setWidget(m_PlayListContainerWidget);
     scroll_area -> setWidgetResizable(true);
-    scroll_area -> setMinimumHeight(200);
-    layout -> addWidget(scroll_area);
-    layout -> addWidget(m_PlayList);
+    pl_layout -> addWidget(scroll_area);
+    pl_layout -> addWidget(m_PlayList);
 
     m_PlayListLayout = new QVBoxLayout();
     m_PlayListLayout -> setSpacing(0);
     m_PlayListContainerWidget -> setLayout(m_PlayListLayout);
 
-    QHBoxLayout * repeat_layout = new QHBoxLayout();
+    QHBoxLayout * bottom_layout = new QHBoxLayout();
+
+
+    // End of title action
+    QLabel * l_end = new QLabel(tr("At the end of a title:"));
+    bottom_layout -> addWidget(l_end);
+
+    m_PlayList_TitleEndMode = new QButtonGroup(this);
+    connect (m_PlayList_TitleEndMode, &QButtonGroup::idClicked,
+        this, [=](const int mcNewState)
+        {
+            SetTitleEndMode(TitleEndMode(mcNewState));
+        });
+
+    QRadioButton * rb_titleend =
+        new QRadioButton(tr("Continue with next file"));
+    m_PlayList_TitleEndMode -> addButton(rb_titleend, TitleEnd_Continue);
+    bottom_layout -> addWidget(rb_titleend);
+
+    rb_titleend = new QRadioButton(tr("Stop"));
+    m_PlayList_TitleEndMode -> addButton(rb_titleend, TitleEnd_Stop);
+    bottom_layout -> addWidget(rb_titleend);
+    SetTitleEndMode(TitleEnd_Stop);
+
+
+    // Separator
+    bottom_layout -> addSpacing(10);
+
+    QLabel * sep = new QLabel();
+    QPixmap line(":/resources/GreyDot.gif");
+    sep -> setPixmap(line);
+    sep -> setScaledContents(true);
+    bottom_layout -> addWidget(sep);
+
+    bottom_layout -> addSpacing(10);
+
+
+    // Repeat action
     QLabel * l_repeat = new QLabel(tr("Repeat"));
-    repeat_layout -> addWidget(l_repeat);
+    bottom_layout -> addWidget(l_repeat);
     m_PlayList_RepeatMode = new QButtonGroup(this);
     connect (m_PlayList_RepeatMode, &QButtonGroup::idClicked,
-        this, &MediaPlayer::SetRepeatMode);
+        this, [=](const int mcNewState)
+        {
+            SetRepeatMode(RepeatMode(mcNewState));
+        });
 
     QRadioButton * rb_repeat = new QRadioButton(tr("None"));
     m_PlayList_RepeatMode -> addButton(rb_repeat, Repeat_None);
-    repeat_layout -> addWidget(rb_repeat);
+    bottom_layout -> addWidget(rb_repeat);
 
     rb_repeat = new QRadioButton(tr("Single"));
     m_PlayList_RepeatMode -> addButton(rb_repeat, Repeat_Single);
-    repeat_layout -> addWidget(rb_repeat);
+    bottom_layout -> addWidget(rb_repeat);
 
     rb_repeat = new QRadioButton(tr("All"));
     m_PlayList_RepeatMode -> addButton(rb_repeat, Repeat_All);
-    repeat_layout -> addWidget(rb_repeat);
+    bottom_layout -> addWidget(rb_repeat);
     SetRepeatMode(Repeat_All);
 
-    repeat_layout -> addStretch(1);
+    bottom_layout -> addStretch(1);
 
-    playlist_layout -> addLayout(repeat_layout);
+    playlist_layout -> addLayout(bottom_layout);
 
 
-    layout -> setStretch(0, 1);
-    layout -> setStretch(1, 0);
-    layout -> setStretch(2, 0);
+    splitter -> setStretchFactor(0, 1);
+    splitter -> setStretchFactor(1, 0);
 
     setMinimumSize(400, 400);
     resize(800, 600);
@@ -464,14 +516,14 @@ void MediaPlayer::PositionChanged(const qint64 mcNewPosition)
         .arg(CALL_SHOW(mcNewPosition)));
 
     // Update text
-    static qint64 old_s = -1;
-    qint64 new_s = mcNewPosition/1000;
+    static double old_s = -1;
+    const double new_s = mcNewPosition * 0.001;
     if (new_s != old_s)
     {
         old_s = new_s;
 
         // Update current time
-        m_CurrentTime -> setText(StringHelper::ConvertToTime(new_s));
+        m_CurrentTime -> setText(StringHelper::ConvertToTime_ms(new_s));
     }
 
     // Update slider
@@ -693,40 +745,46 @@ void MediaPlayer::ReplayPositionChanged(const qint64 mcNewPosition)
     if (mcNewPosition >= max_time)
     {
         emit ReplayFinished();
-        bool was_last_file =
-            (m_PlayList_CurrentIndex == m_PlayList_Indices.last());
-        switch (m_RepeatMode)
+        if (m_TitleEndMode == TitleEnd_Stop)
         {
-            case Repeat_None:
-                if (was_last_file)
-                {
-                    Pause();
-                } else
-                {
-                    NextFile();
-                }
-                break;
-
-            case Repeat_Single:
-                PlayPlayListIndex(m_PlayList_CurrentIndex);
-                break;
-
-            case Repeat_All:
-                if (was_last_file)
-                {
-                    PlayPlayListIndex(0);
-                } else
-                {
-                    NextFile();
-                }
-                break;
-
-            default:
+            Pause();
+        } else
+        {
+            bool was_last_file =
+                (m_PlayList_CurrentIndex == m_PlayList_Indices.last());
+            switch (m_RepeatMode)
             {
-                const QString reason = tr("Unhandled repeat option.");
-                MessageLogger::Error(CALL_METHOD, reason);
-                CALL_OUT(reason);
-                return;
+                case Repeat_None:
+                    if (was_last_file)
+                    {
+                        Pause();
+                    } else
+                    {
+                        NextFile();
+                    }
+                    break;
+
+                case Repeat_Single:
+                    PlayPlayListIndex(m_PlayList_CurrentIndex);
+                    break;
+
+                case Repeat_All:
+                    if (was_last_file)
+                    {
+                        PlayPlayListIndex(0);
+                    } else
+                    {
+                        NextFile();
+                    }
+                    break;
+
+                default:
+                {
+                    const QString reason = tr("Unhandled repeat option.");
+                    MessageLogger::Error(CALL_METHOD, reason);
+                    CALL_OUT(reason);
+                    return;
+                }
             }
         }
     }
@@ -1122,7 +1180,7 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
 
     m_TimeSlider -> setMinimum(min_time);
     m_TimeSlider -> setMaximum(max_time);
-    m_MaxTime -> setText(StringHelper::ConvertToTime(max_time/1000));
+    m_MaxTime -> setText(StringHelper::ConvertToTime_ms(max_time*0.001));
 
 
     // Set window title
@@ -1318,14 +1376,43 @@ void MediaPlayer::Update_PlayList()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Convert repeat mode
+QString MediaPlayer::ToHumanReadable(const MediaPlayer::RepeatMode mcMode) const
+{
+    CALL_IN(QString("mcMode=%1")
+        .arg("..."));
+
+    // Mapper
+    static QHash < RepeatMode, QString > mapper;
+    if (mapper.isEmpty())
+    {
+        mapper[Repeat_None] = "none";
+        mapper[Repeat_Single] = "single";
+        mapper[Repeat_All] = "all";
+    }
+    if (!mapper.contains(mcMode))
+    {
+        const QString reason = tr("Unknown repeat mode encountered.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QString();
+    }
+
+    CALL_OUT("");
+    return mapper[mcMode];
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Set repeat mode
-void MediaPlayer::SetRepeatMode(const int mcNewState)
+void MediaPlayer::SetRepeatMode(const MediaPlayer::RepeatMode mcNewState)
 {
     CALL_IN(QString("mcNewState=%1")
-        .arg(CALL_SHOW(mcNewState)));
+        .arg(CALL_SHOW(ToHumanReadable(mcNewState))));
 
     // Check if state changes
-    if (RepeatMode(mcNewState) == m_RepeatMode)
+    if (mcNewState == m_RepeatMode)
     {
         // No change
         CALL_OUT("");
@@ -1333,7 +1420,7 @@ void MediaPlayer::SetRepeatMode(const int mcNewState)
     }
 
     // Set new state
-    m_RepeatMode = RepeatMode(mcNewState);
+    m_RepeatMode = mcNewState;
     m_PlayList_RepeatMode -> blockSignals(true);
     m_PlayList_RepeatMode -> button(m_RepeatMode) -> setChecked(true);
     m_PlayList_RepeatMode -> blockSignals(false);
@@ -1351,6 +1438,73 @@ MediaPlayer::RepeatMode MediaPlayer::GetRepeatMode() const
 
     CALL_OUT("");
     return m_RepeatMode;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Convert title end mode
+QString MediaPlayer::ToHumanReadable(
+    const MediaPlayer::TitleEndMode mcMode) const
+{
+    CALL_IN(QString("mcMode=%1")
+        .arg("..."));
+
+    // Mapper
+    static QHash < TitleEndMode, QString > mapper;
+    if (mapper.isEmpty())
+    {
+        mapper[TitleEnd_Continue] = "continue";
+        mapper[TitleEnd_Stop] = "stop";
+    }
+    if (!mapper.contains(mcMode))
+    {
+        const QString reason = tr("Unknown title end mode encountered.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QString();
+    }
+
+    CALL_OUT("");
+    return mapper[mcMode];
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Set title end mode
+void MediaPlayer::SetTitleEndMode(const MediaPlayer::TitleEndMode mcNewState)
+{
+    CALL_IN(QString("mcNewState=%1")
+        .arg(CALL_SHOW(ToHumanReadable(mcNewState))));
+
+    // Check if mode changes
+    if (mcNewState == m_TitleEndMode)
+    {
+        // No change
+        CALL_OUT("");
+        return;
+    }
+
+    // Set new mode
+    m_TitleEndMode = mcNewState;
+    m_PlayList_TitleEndMode -> blockSignals(true);
+    m_PlayList_TitleEndMode -> button(m_TitleEndMode) -> setChecked(true);
+    m_PlayList_TitleEndMode -> blockSignals(false);
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get title end mode
+MediaPlayer::TitleEndMode MediaPlayer::GetTitleEndMode() const
+{
+    CALL_IN("");
+
+    CALL_OUT("");
+    return m_TitleEndMode;
 }
 
 

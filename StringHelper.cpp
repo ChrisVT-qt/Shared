@@ -1382,6 +1382,31 @@ QString StringHelper::ConvertToTime(const qint64 mcSeconds)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Convert seconds to time
+QString StringHelper::ConvertToTime_ms(const double mcSeconds)
+{
+    CALL_IN(QString("mcSeconds=%1")
+        .arg(CALL_SHOW(mcSeconds)));
+
+    int sec = int(mcSeconds);
+    const int min = sec/60;
+    const QString text_min = QString("0" + QString::number(min)).right(2);
+    sec = sec % 60;
+    const QString text_sec = QString("0" + QString::number(sec)).right(2);
+    const int ms = (mcSeconds - sec) * 1000;
+    const QString text_ms = QString("00" + QString::number(ms)).right(3);
+    const QString time = QString("%1:%2.%3")
+        .arg(text_min,
+             text_sec,
+             text_ms);
+
+    CALL_OUT("");
+    return time;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Convert time to ms
 qint64 StringHelper::ConvertToMilliSeconds(const QString & mcrTime)
 {
@@ -1403,21 +1428,24 @@ qint64 StringHelper::ConvertToMilliSeconds(const QString & mcrTime)
     qint64 z = 0;
 
     const QRegularExpressionMatch match_h = format_time_h.match(mcrTime);
-    if (match_h.hasMatch())
+    while (true)
     {
-        if (match_h.captured(1) == "-")
+        if (match_h.hasMatch())
         {
-            sign = -1;
+            if (match_h.captured(1) == "-")
+            {
+                sign = -1;
+            }
+            h = match_h.captured(2).toInt();
+            m = match_h.captured(3).toInt();
+            s = match_h.captured(4).toInt();
+            if (!match_h.captured(6).isEmpty())
+            {
+                z = ("0." + match_h.captured(6)).toDouble() * 1000;
+            }
+            break;
         }
-        h = match_h.captured(2).toInt();
-        m = match_h.captured(3).toInt();
-        s = match_h.captured(4).toInt();
-        if (!match_h.captured(6).isEmpty())
-        {
-            z = match_h.captured(6).toInt();
-        }
-    } else
-    {
+
         const QRegularExpressionMatch match_m = format_time_m.match(mcrTime);
         if (match_m.hasMatch())
         {
@@ -1429,32 +1457,32 @@ qint64 StringHelper::ConvertToMilliSeconds(const QString & mcrTime)
             s = match_m.captured(3).toInt();
             if (!match_m.captured(5).isEmpty())
             {
-                z = match_m.captured(5).toInt();
+                z = ("0." + match_m.captured(5)).toDouble() * 1000;
             }
-        } else
-        {
-            const QRegularExpressionMatch match_s =
-                format_time_s.match(mcrTime);
-            if (match_s.hasMatch())
-            {
-                if (match_s.captured(1) == "-")
-                {
-                    sign = -1;
-                }
-                s = match_s.captured(2).toInt();
-                if (!match_s.captured(4).isEmpty())
-                {
-                    z = match_s.captured(4).toInt();
-                }
-            } else
-            {
-                const QString reason = tr("Incorrect time format \"%1\".")
-                    .arg(mcrTime);
-                MessageLogger::Error(CALL_METHOD, reason);
-                CALL_OUT(reason);
-                return -1;
-            }
+            break;
         }
+
+        const QRegularExpressionMatch match_s =
+            format_time_s.match(mcrTime);
+        if (match_s.hasMatch())
+        {
+            if (match_s.captured(1) == "-")
+            {
+                sign = -1;
+            }
+            s = match_s.captured(2).toInt();
+            if (!match_s.captured(4).isEmpty())
+            {
+                z = ("0." + match_s.captured(4)).toDouble() * 1000;
+            }
+            break;
+        }
+
+        const QString reason = tr("Incorrect time format \"%1\".")
+            .arg(mcrTime);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return -1;
     }
 
     const qint64 time_ms = sign * (((h * 60 + m) * 60 + s) * 1000 + z);
@@ -3528,6 +3556,22 @@ bool StringHelper::IsValidDate(const QString & mcrDate)
 
     const QDate date = QDate::fromString(mcrDate, "yyyy-MM-dd");
     const bool is_valid = date.isValid();
+
+    CALL_OUT("");
+    return is_valid;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Check if a time has a valid format
+bool StringHelper::IsValidTime(const QString & mcrTime)
+{
+    CALL_IN(QString("mcrTime=%1")
+        .arg(CALL_SHOW(mcrTime)));
+
+    const QTime time = QTime::fromString(mcrTime, "hh:mm:ss");
+    const bool is_valid = time.isValid();
 
     CALL_OUT("");
     return is_valid;

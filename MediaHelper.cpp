@@ -54,6 +54,71 @@ MediaHelper::~MediaHelper()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+QStringList MediaHelper::ToHumanReadable(
+    const QHash < MediaHelper::Metadata, QString > & mcrMetadata)
+{
+    CALL_IN(QString("mcrMetadata=%1")
+        .arg("..."));
+
+    static QHash < Metadata, QString > mapper;
+    if (mapper.isEmpty())
+    {
+        mapper[Metadata_AudioBitRate] = "Audio Bit Rate";
+        mapper[Metadata_AudioCodec] = "Audio Codec";
+        mapper[Metadata_AudioCodecLong] = "Audio Codec (long)";
+        mapper[Metadata_Author] = "Author";
+        mapper[Metadata_Comments] = "Comments";
+        mapper[Metadata_Copyright] = "Copyright";
+        mapper[Metadata_DateTime] = "Date/Time";
+        mapper[Metadata_Description] = "Description";
+        mapper[Metadata_Duration_ms] = "Duration (ms)";
+        mapper[Metadata_Duration_s] = "Duration (s)";
+        mapper[Metadata_FileDateTime] = "File Date/Time";
+        mapper[Metadata_FileFormat] = "File Format";
+        mapper[Metadata_FileSize] = "File Size";
+        mapper[Metadata_Genres] = "Genres";
+        mapper[Metadata_Height] = "Height";
+        mapper[Metadata_Language] = "Language";
+        mapper[Metadata_LocalDirectory] = "Local Directory";
+        mapper[Metadata_LocalFilename] = "Local Filename";
+        mapper[Metadata_MIMEType] = "MIME Type";
+        mapper[Metadata_Publisher] = "Publisher";
+        mapper[Metadata_Title] = "Title";
+        mapper[Metadata_Url] = "URL";
+        mapper[Metadata_VideoBitRate] = "Video Bit Rate";
+        mapper[Metadata_VideoCodec] = "Video Codec";
+        mapper[Metadata_VideoCodecLong] = "Video Codec (long)";
+        mapper[Metadata_VideoFrameRate] = "Video Frame Rate";
+        mapper[Metadata_Width] = "Width";
+    }
+
+    QStringList metadata;
+    for (auto item_iterator = mcrMetadata.keyBegin();
+         item_iterator != mcrMetadata.keyEnd();
+         item_iterator++)
+    {
+        Metadata item = *item_iterator;
+        if (!mapper.contains(item))
+        {
+            const QString reason = tr("Item not in mapper.");
+            MessageLogger::Error(CALL_METHOD, reason);
+            // Ignore
+        } else
+        {
+            metadata << QString("%1: \"%2\"")
+                .arg(mapper[item],
+                     mcrMetadata[item]);
+        }
+    }
+    std::sort(metadata.begin(), metadata.end());
+
+    CALL_OUT("");
+    return metadata;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Get all available metadata
 QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     const QString & mcrFilename)
@@ -412,8 +477,11 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
         const QMediaFormat::VideoCodec format_id =
             (QMediaFormat::VideoCodec)
             media_metadata.value(QMediaMetaData::VideoCodec).toInt();
-        metadata[Metadata_VideoCodec] = format_mapper_short[format_id];
-        metadata[Metadata_VideoCodecLong] = format_mapper_long[format_id];
+        if (!format_mapper_short[format_id].isEmpty())
+        {
+            metadata[Metadata_VideoCodec] = format_mapper_short[format_id];
+            metadata[Metadata_VideoCodecLong] = format_mapper_long[format_id];
+        }
     }
 
     CALL_OUT("");

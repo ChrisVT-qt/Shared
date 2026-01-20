@@ -926,17 +926,20 @@ void XMLHelper::GetHTML_Rec(const QDomElement & mcrElement,
                     .arg(attribute,
                          mcrElement.attribute(attribute));
             }
-            opening += "/>";
+            opening += ">";
             mrHTML << opening;
         }
 
         // Process child elements regardless of being HTML tags or not
         GetHTML_Rec(dom_child_element, mrHTML);
 
-        // Close the tag we opened above
-        const QString closing = QString("</%1>")
-            .arg(tag);
-        mrHTML << closing;
+        if (known_html_tags.contains(tag))
+        {
+            // Close the tag we opened above
+            const QString closing = QString("</%1>")
+                .arg(tag);
+            mrHTML << closing;
+        }
     }
 
     CALL_OUT("");
@@ -962,6 +965,7 @@ QSet < QString > XMLHelper::GetKnownHTMLTags()
         "li",
         "ol",
         "p",
+        "s",
         "span",
         "table",
         "td",

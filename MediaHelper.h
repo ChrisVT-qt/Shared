@@ -62,6 +62,9 @@ public:
         Metadata_VideoFrameRate,
         Metadata_Width
     };
+    static QStringList ToHumanReadable(
+        const QHash < MediaHelper::Metadata, QString > & mcrMetadata);
+
     static QHash < Metadata, QString > GetMediaMetadata(
         const QString & mcrFilename);
 

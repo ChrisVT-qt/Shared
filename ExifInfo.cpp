@@ -500,6 +500,12 @@ QString ExifInfo::GetLensMinFocalLength() const
         lens_spec = m_ExifData["Nikon3"]["Lens"];
     }
 
+    // Anything with a zero denominator is invalid and is ignored
+    if (lens_spec.endsWith("/0"))
+    {
+        lens_spec = "";
+    }
+
     if (!lens_spec.isEmpty())
     {
         // Format
@@ -522,8 +528,10 @@ QString ExifInfo::GetLensMinFocalLength() const
             return QString();
         }
 
+        const QString focal_length = ConvertRational(match_lens.captured(1));
+
         CALL_OUT("");
-        return ConvertRational(match_lens.captured(1));
+        return focal_length;
     }
 
     if (DEBUG)
@@ -595,6 +603,12 @@ QString ExifInfo::GetLensMaxFocalLength() const
         lens_spec = m_ExifData["Nikon3"]["Lens"];
     }
 
+    // Anything with a zero denominator is invalid and is ignored
+    if (lens_spec.endsWith("/0"))
+    {
+        lens_spec = "";
+    }
+
     if (!lens_spec.isEmpty())
     {
         // Format
@@ -617,8 +631,10 @@ QString ExifInfo::GetLensMaxFocalLength() const
             return QString();
         }
 
+        const QString focal_length = ConvertRational(match_lens.captured(2));
+
         CALL_OUT("");
-        return ConvertRational(match_lens.captured(2));
+        return focal_length;
     }
 
     if (DEBUG)
@@ -655,6 +671,12 @@ QString ExifInfo::GetLensMinFStopAtMinFocalLength() const
         lens_spec = m_ExifData["Nikon3"]["Lens"];
     }
 
+    // Anything with a zero denominator is invalid and is ignored
+    if (lens_spec.endsWith("/0"))
+    {
+        lens_spec = "";
+    }
+
     if (!lens_spec.isEmpty())
     {
         // Format
@@ -677,8 +699,10 @@ QString ExifInfo::GetLensMinFStopAtMinFocalLength() const
             return QString();
         }
 
+        const QString f_stop = ConvertRational(match_lens.captured(3));
+
         CALL_OUT("");
-        return ConvertRational(match_lens.captured(3));
+        return f_stop;
     }
 
     if (DEBUG)
@@ -737,8 +761,10 @@ QString ExifInfo::GetLensMinFStopAtMaxFocalLength() const
             return QString();
         }
 
+        const QString f_stop = ConvertRational(match_lens.captured(4));
+
         CALL_OUT("");
-        return ConvertRational(match_lens.captured(4));
+        return f_stop;
     }
 
     if (DEBUG)
@@ -2466,6 +2492,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.SM-N9005"] = "Galaxy Note 3 SM-N9005";
     m_CameraModelMapper["Samsung.SM-N9020"] = "Galaxy Note 3 SM-N9020";
     m_CameraModelMapper["Samsung.SM-S820L"] = "Galaxy Core Prime";
+    m_CameraModelMapper["Samsung.SM-S908E"] = "Galaxy S22 Ultra (SM-S908E)";
     m_CameraModelMapper["Samsung.<Digimax D53>"] = "Digimax D53";
     m_CameraModelMapper[
         "Samsung.<Digimax S500 / Kenox S500 / Digimax Cyber 530>"] =
@@ -2948,7 +2975,7 @@ void ExifInfo::Init_FocalLengthMapper()
          counter++)
     {
         const QString key = QString::number(counter) + "/1";
-        m_FocalLengthMapper[key] = key;
+        m_FocalLengthMapper[key] = QString::number(counter);
     }
     m_FocalLengthMapper["500/1"] = "500";
     m_FocalLengthMapper["550/1"] = "550";
@@ -3087,6 +3114,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["620/100"] = "6.2";
     m_FocalLengthMapper["630/100"] = "6.3";
     m_FocalLengthMapper["633/100"] = "6.3";
+    m_FocalLengthMapper["640/100"] = "6.4";
     m_FocalLengthMapper["650/100"] = "6.5";
     m_FocalLengthMapper["660/100"] = "6.6";
     m_FocalLengthMapper["663/100"] = "6.6";

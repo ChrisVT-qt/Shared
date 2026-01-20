@@ -144,6 +144,7 @@ public:
 
     // Convert seconds to time
     static QString ConvertToTime(const qint64 mcSeconds);
+    static QString ConvertToTime_ms(const double mcSeconds);
 
     // Convert time to ms
     static qint64 ConvertToMilliSeconds(const QString & mcrTime);
@@ -249,6 +250,9 @@ public:
 public:
     // Check if a date has a valid format
     static bool IsValidDate(const QString & mcrDate);
+
+    // Check if a time has a valid format
+    static bool IsValidTime(const QString & mcrTime);
 
     // Check if a date/time has a valid format
     static bool IsValidDateTime(const QString & mcrDateTime);
