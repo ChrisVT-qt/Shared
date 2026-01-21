@@ -875,6 +875,7 @@ QString ExifInfo::GetExposureFocalLength() const
                 .arg(m_Filename,
                      length);
             MessageLogger::Message(CALL_METHOD, reason);
+            length = ConvertRational(length);
         }
 
         CALL_OUT("");
@@ -886,7 +887,7 @@ QString ExifInfo::GetExposureFocalLength() const
     // No date time information
     if (DEBUG)
     {
-        qDebug().noquote() << tr("%1: No forcal length.")
+        qDebug().noquote() << tr("%1: No focal length.")
             .arg(m_Filename);
     }
 
@@ -1936,6 +1937,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 12"] = "iPhone 12";
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
     m_CameraModelMapper["Apple.iPhone 15 Pro Max"] = "iPhone 15 Pro Max";
+    m_CameraModelMapper["Apple.iPhone 16"] = "iPhone 16";
     m_CameraModelMapper["Apple.iPhone 16e"] = "iPhone 16e";
     m_CameraModelMapper["Apple.iPhone 16 Pro Max"] = "iPhone 16 Pro Max";
     m_CameraModelMapper["Apple.iPhone SE (2nd generation)"] = "iPhone SE 2";
