@@ -56,6 +56,10 @@ signals:
     /** \brief Emitted when widget is double-clicked
       */
     void DoubleClicked();
+
+public slots:
+    // !!!
+    void DroppedURIs(const QMimeData * data);
 };
 
 #endif

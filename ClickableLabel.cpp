@@ -113,3 +113,6 @@ void ClickableLabel::mouseDoubleClickEvent(QMouseEvent * mpEvent)
 
     CALL_OUT("");
 }
+
+void ClickableLabel::DroppedURIs(const QMimeData * data) {}
+

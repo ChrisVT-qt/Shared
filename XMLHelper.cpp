@@ -486,7 +486,8 @@ bool XMLHelper::Copy(const QDomElement & mcrSourceDOM,
 ///////////////////////////////////////////////////////////////////////////////
 // Copy HTML DOM to another document
 bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
-    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName)
+    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName,
+    const QSet < QString > & mcrAcceptableTags)
 {
     CALL_IN(QString("mcSourceDOM=%1, mDOMParent=%2, mcIgnoreSourceTagName=%3")
         .arg(CALL_SHOW(mcrSourceDOM),

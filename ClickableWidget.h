@@ -27,21 +27,21 @@ class ClickableWidget
     : public QWidget
 {
     Q_OBJECT
-    
-    
-    
+
+
+
     // ============================================================== Lifecycle
 public:
     /** \brief Constructor
       */
-	ClickableWidget();
+    ClickableWidget();
 
     /** \brief Destructor
       */
     virtual ~ClickableWidget();
-    
-    
-    
+
+
+
     // ============================================================ Drag & Drop
 protected:
     /** \brief Called when user drags something into the widget
@@ -87,7 +87,7 @@ protected:
       * \param mpEvent Details of the double click
       */
     virtual void mouseDoubleClickEvent(QMouseEvent * mpEvent);
-    
+
     /** \brief Drag start position
       */
     QPoint m_DragStartPosition;
@@ -111,23 +111,23 @@ signals:
       * \param mpWidget Widget being clicked
       */
     void SingleClicked(QWidget * mpWidget);
-    
+
     /** \brief Emitted when widget is double-clicked
       * \param mpWidget Widget being double-clicked
       */
     void DoubleClicked(QWidget * mpWidget);
-    
+
     /** \brief Emitted when content has been dragged from one widget to another
       * \param mpStartWidget Widget that initiated the drag
       * \param mpEndWidget Widget that was dragged into
       */
     void Dragging(QWidget * mpStartWidget, QWidget * mpEndWidget);
-    
+
     /** \brief Emitted when hovering over a widget
       * \param mpWidget Widget being hovered
       */
     void HoveringOver(QWidget * mpWidget);
-    
+
     /** \brief Emitted when something was dropped onto the widget
       * \param mcpMimeData Content of the drop
       * \param mpWidget Widget that was dropped into
