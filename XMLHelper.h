@@ -74,7 +74,7 @@ public:
     static bool CopyHTML(const QDomElement & mcrDOMSource,
         QDomElement & mrDOMParent,
         const bool mcIgnoreSourceTagName = false,
-        const QSet < QString > & mcrAcceptedTags = {});
+        const QSet < QString > & mcrAcceptableTags = {});
 
     // Encode HTML entities for XML
     static QString EncodeHTMLEntities(QString mHTMLText);
