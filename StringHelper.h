@@ -265,6 +265,10 @@ public:
 
 
 
+
+    static bool StartsWithDigit(const QString & mcrText);
+    static bool StartsWithLetter(const QString & mcrText);
+
     // ====================================================== Photography stuff
 public:
     // Convert exposure time to double

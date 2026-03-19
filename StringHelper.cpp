@@ -3685,6 +3685,14 @@ bool StringHelper::IsValidDateTime(const QString & mcrDateTime)
     return is_valid;
 }
 
+bool StringHelper::StartsWithDigit(const QString & mcrText)
+{
+return true;
+}
+bool StringHelper::StartsWithLetter(const QString & mcrText)
+{
+return true;
+}
 
 
 // ========================================================== Photography stuff
