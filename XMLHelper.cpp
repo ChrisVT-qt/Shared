@@ -486,12 +486,15 @@ bool XMLHelper::Copy(const QDomElement & mcrSourceDOM,
 ///////////////////////////////////////////////////////////////////////////////
 // Copy HTML DOM to another document
 bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
-    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName)
+    QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName,
+    const QSet < QString > & mcrAcceptedTags)
 {
-    CALL_IN(QString("mcSourceDOM=%1, mDOMParent=%2, mcIgnoreSourceTagName=%3")
+    CALL_IN(QString("mcSourceDOM=%1, mDOMParent=%2, mcIgnoreSourceTagName=%3, "
+        "mcrAcceptedTags=%4")
         .arg(CALL_SHOW(mcrSourceDOM),
              CALL_SHOW(mrDOMParent),
-             CALL_SHOW(mcIgnoreSourceTagName)));
+             CALL_SHOW(mcIgnoreSourceTagName),
+             CALL_SHOW(mcrAcceptedTags)));
 
     // It's not going to change
     static QSet < QString > known_html_tags = GetKnownHTMLTags();
@@ -511,7 +514,8 @@ bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
     if (!mcIgnoreSourceTagName)
     {
         const QString tag = mcrSourceDOM.tagName();
-        if (!known_html_tags.contains(tag))
+        if (!known_html_tags.contains(tag) &&
+            !mcrAcceptedTags.contains(tag))
         {
             const QString reason =
                 tr("Top level tag <%1> is not a valid HTML tag.")
@@ -559,7 +563,8 @@ bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
         {
             const QDomElement dom_source_element = dom_child.toElement();
             const QString tag = dom_source_element.tagName();
-            if (!known_html_tags.contains(tag))
+            if (!known_html_tags.contains(tag) &&
+                !mcrAcceptedTags.contains(tag))
             {
                 const QString reason =  tr("Tag <%1> is not a valid HTML tag.")
                     .arg(tag);
@@ -567,7 +572,8 @@ bool XMLHelper::CopyHTML(const QDomElement & mcrSourceDOM,
                 CALL_OUT(reason);
                 return false;
             }
-            const bool success = CopyHTML(dom_source_element, dom_element);
+            const bool success = CopyHTML(dom_source_element, dom_element,
+                false, mcrAcceptedTags);
             if (!success)
             {
                 // Error has been reported elsewhere.

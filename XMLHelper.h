@@ -73,7 +73,8 @@ public:
     // Copy HTML DOM to another document
     static bool CopyHTML(const QDomElement & mcrDOMSource,
         QDomElement & mrDOMParent,
-        const bool mcIgnoreSourceTagName = false);
+        const bool mcIgnoreSourceTagName = false,
+        const QSet < QString > & mcrAcceptedTags = {});
 
     // Encode HTML entities for XML
     static QString EncodeHTMLEntities(QString mHTMLText);

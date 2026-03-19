@@ -1935,6 +1935,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 11"] = "iPhone 11";
     m_CameraModelMapper["Apple.iPhone 11 Pro Max"] = "iPhone 11 Pro Max";
     m_CameraModelMapper["Apple.iPhone 12"] = "iPhone 12";
+    m_CameraModelMapper["Apple.iPhone 12 Pro"] = "iPhone 12 Pro";
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
     m_CameraModelMapper["Apple.iPhone 15 Pro Max"] = "iPhone 15 Pro Max";
     m_CameraModelMapper["Apple.iPhone 16"] = "iPhone 16";
@@ -2450,6 +2451,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.Digimax L60"] = "Digimax L60";
     m_CameraModelMapper["Samsung.Galaxy S23 Ultra"] = "Galaxy S23 Ultra";
     m_CameraModelMapper["Samsung.Galaxy S24 Ultra"] = "Galaxy S24 Ultra";
+    m_CameraModelMapper["Samsung.Galaxy S25 Ultra"] = "Galaxy S25 Ultra";
     m_CameraModelMapper["Samsung.GT-I9100"] = "Galaxy S II GT-I9100";
     m_CameraModelMapper["Samsung.GT-I9295"] = "Galaxy S IV Active GT-I9295";
     m_CameraModelMapper["Samsung.GT-I9300"] = "Galaxy S III GT-I9300";
@@ -2463,6 +2465,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.SAMSUNG-SM-G935A"] = "Galaxy S7 Edge (AT&T)";
     m_CameraModelMapper["Samsung.SGH-M919"] = "Galaxy S4 SGH-M919";
     m_CameraModelMapper["Samsung.SGH-T989"] = "Galaxy S II SGH-T989";
+    m_CameraModelMapper["Samsung.SM-A217F"] = "Galaxy A21s SM-A217F";
     m_CameraModelMapper["Samsung.SM-A526B"] = "Galaxy SM-A526B";
     m_CameraModelMapper["Samsung.SM-G900F"] =
         "Galaxy S5 SM-G900F (Factory Unlocked)";
@@ -2490,9 +2493,11 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.SM-G996U"] = "Galaxy S21+ 5G SM-G996U";
     m_CameraModelMapper["Samsung.SM-J500FN"] = "Galaxy J5 SM-J500FN";
     m_CameraModelMapper["Samsung.SM-J500M"] = "Galaxy J5 SM-J500M";
+    m_CameraModelMapper["Samsung.SM-J727T"] = "Galaxy J7 Prima SM-J727T";
     m_CameraModelMapper["Samsung.SM-N920T"] = "Galaxy Note 5 SM-N920T";
     m_CameraModelMapper["Samsung.SM-N9005"] = "Galaxy Note 3 SM-N9005";
     m_CameraModelMapper["Samsung.SM-N9020"] = "Galaxy Note 3 SM-N9020";
+    m_CameraModelMapper["Samsung.SM-S135DL"] = "Galaxy A03s SM-S135DL";
     m_CameraModelMapper["Samsung.SM-S820L"] = "Galaxy Core Prime";
     m_CameraModelMapper["Samsung.SM-S908E"] = "Galaxy S22 Ultra (SM-S908E)";
     m_CameraModelMapper["Samsung.<Digimax D53>"] = "Digimax D53";
@@ -2668,6 +2673,8 @@ void ExifInfo::Init_LensModelMapper()
         "Apple iPhone 12 Back Camera 4.2mm f/1.6";
     m_LensModelMapper["Apple.iPhone 12 front camera 2.71mm f/2.2"] =
         "Apple iPhone 12 Front Camera 2.71mm f/2.2";
+    m_LensModelMapper["Apple.iPhone 12 Pro back triple camera 4.2mm f/1.6"] =
+        "Apple iPhone 12 Pro Back Triple Camera 4.2mm f/1.6";
     m_LensModelMapper["Apple.iPhone 12 Pro Max back camera 5.1mm f/1.6"] =
         "Apple iPhone 12 Pro Max Back Camera 5.1mm f/1.6";
     m_LensModelMapper["Apple.iPhone 15 Pro Max back triple camera 6.765mm "
@@ -2939,6 +2946,7 @@ void ExifInfo::Init_FStopMapper()
     m_FStopMapper["3100/1000"] = "3.1";
 
     m_FStopMapper["17000/10000"] = "1.7";
+    m_FStopMapper["19000/10000"] = "1.9";
     m_FStopMapper["22000/10000"] = "2.2";
     m_FStopMapper["24000/10000"] = "2.4";
 
@@ -3079,6 +3087,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["220/100"] = "2.2";
     m_FocalLengthMapper["271/100"] = "2.7";
     m_FocalLengthMapper["279/100"] = "2.8";
+    m_FocalLengthMapper["290/100"] = "2.9";
     m_FocalLengthMapper["331/100"] = "3.3";
     m_FocalLengthMapper["350/100"] = "3.5";
     m_FocalLengthMapper["354/100"] = "3.5";
@@ -3307,6 +3316,7 @@ void ExifInfo::Init_ExposureTimeMapper()
 
     m_ExposureTimeMapper["100/599"] = "1/6";
     m_ExposureTimeMapper["120/1"] = "120";
+    m_ExposureTimeMapper["196/10000"] = "1/50";
     m_ExposureTimeMapper["285/10000"] = "1/35";
     m_ExposureTimeMapper["360/9450"] = "1/26";
     m_ExposureTimeMapper["400/10000"] = "1/25";

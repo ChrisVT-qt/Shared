@@ -11,6 +11,7 @@
 
 // Qt includes
 #include <QLabel>
+#include <QMimeData>
 #include <QMouseEvent>
 #include <QPoint>
 
@@ -28,13 +29,17 @@ public:
       */
     ClickableLabel();
 
+    /** \brief Constructor
+      */
+    ClickableLabel(const QString & mcrText);
+
     /** \brief Destructor
       */
     virtual ~ClickableLabel();
 
 
 
-    // ============================================================ Clicking
+    // =============================================================== Clicking
 protected:
     /** \brief Called when user presses a mouse button inside the widget
       * \param mpEvent Details of the mouse click
@@ -56,6 +61,30 @@ signals:
     /** \brief Emitted when widget is double-clicked
       */
     void DoubleClicked();
+
+
+
+    // ============================================================ Drag & Drop
+protected:
+    /** \brief Called when user drags something into the widget
+      * \param mpEvent Details of the drag event
+      */
+    virtual void dragEnterEvent(QDragEnterEvent * mpEvent);
+
+    /** \brief Called when user drags something out of the widget
+      * \param mpEvent Details of the drag event
+      */
+    virtual void dragLeaveEvent(QDragLeaveEvent * mpEvent);
+
+    /** \brief Called when user drops something on the widget
+      * \param mpEvent Details of the drop event
+      */
+    virtual void dropEvent(QDropEvent * mpEvent);
+
+signals:
+    /** \brief Emitted when user dropped something on the widget
+      */
+    void DroppedURIs(const QMimeData * mcpMIMEData);
 };
 
 #endif

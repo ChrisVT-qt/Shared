@@ -21,6 +21,7 @@
 // Project includes
 #include "CallTracer.h"
 #include "MessageLogger.h"
+#include "StringHelper.h"
 
 // Qt includes
 #include <QDebug>
@@ -89,11 +90,14 @@ MessageLogger::~MessageLogger()
 void MessageLogger::Error(const QString mcMethod, const QString mcReason)
 {
     // Dump to console
-    qDebug().noquote() << tr("ERROR: %1:\n\t%2")
+    qDebug().noquote() << StringHelper::ANSI_RedFont;
+    qDebug().noquote()
+        << tr("ERROR: %1:\n\t%2")
         .arg(mcMethod,
              mcReason);
     qDebug().noquote() << tr("Callback stack:\n%1")
         .arg(CALL_STACK());
+    qDebug().noquote() << StringHelper::ANSI_ResetColor;
 }
 
 

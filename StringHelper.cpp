@@ -1244,8 +1244,10 @@ QStringList StringHelper::SplitQuotedText(const QString mcText)
         remaining_text += match.captured(3).trimmed();
         match = format_quoted.match(remaining_text);
     }
+
     // Remove any remaining unmatched quotes
     remaining_text.replace("\"", "");
+
     // Unquoted single words
     static const QRegularExpression format_space("^\\s*([^\\s]+)(.*)$");
     match = format_space.match(remaining_text);
@@ -3543,6 +3545,71 @@ QList < int > StringHelper::ConvertToInt(const QStringList & mcrList)
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+// Text starting with a letter
+bool StringHelper::StartsWithLetter(const QString & mcrText)
+{
+    CALL_IN(QString("mcrText=%1")
+        .arg(CALL_SHOW(mcrText)));
+
+    if (mcrText.isEmpty())
+    {
+        const QString reason = tr("Empty text provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return false;
+    }
+
+    const QString first_letter = mcrText.left(1);
+    static const QSet < QString > umlauts{"ä", "Ä", "ö", "Ö", "ü", "Ü"};
+    if ((first_letter >= "a" && first_letter <= "z") ||
+        (first_letter >= "A" && first_letter <= "Z") ||
+        umlauts.contains(first_letter))
+    {
+        CALL_OUT("");
+        return true;
+    } else
+    {
+        CALL_OUT("");
+        return false;
+    }
+
+    // We never get here
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Text starting with a digit
+bool StringHelper::StartsWithDigit(const QString & mcrText)
+{
+    CALL_IN(QString("mcrText=%1")
+        .arg(CALL_SHOW(mcrText)));
+
+    if (mcrText.isEmpty())
+    {
+        const QString reason = tr("Empty text provided.");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return false;
+    }
+
+    const QString first_letter = mcrText.left(1);
+    if (first_letter >= "0" && first_letter <= "9")
+    {
+        CALL_OUT("");
+        return true;
+    } else
+    {
+        CALL_OUT("");
+        return false;
+    }
+
+    // We never get here
+}
+
+
+
 // ============================================================== Format stuff
 
 
@@ -3570,11 +3637,35 @@ bool StringHelper::IsValidTime(const QString & mcrTime)
     CALL_IN(QString("mcrTime=%1")
         .arg(CALL_SHOW(mcrTime)));
 
-    const QTime time = QTime::fromString(mcrTime, "hh:mm:ss");
-    const bool is_valid = time.isValid();
+    // Same expression as in StringHelper::ConvertToMilliSeconds()
+    static const QRegularExpression format_time_h(
+        "^(\\+|\\-)?([0-9]+):([0-5][0-9]):([0-5][0-9])(\\.([0-9]{0,3}))?$");
+    static const QRegularExpression format_time_m(
+        "^(\\+|\\-)?([0-5]?[0-9]):([0-5][0-9])(\\.([0-9]{0,3}))?$");
+    static const QRegularExpression format_time_s(
+        "^(\\+|\\-)?([0-5]?[0-9])(\\.([0-9]{0,3}))?$");
+
+    QRegularExpressionMatch match = format_time_h.match(mcrTime);
+    if (match.hasMatch())
+    {
+        CALL_OUT("");
+        return true;
+    }
+    match = format_time_m.match(mcrTime);
+    if (match.hasMatch())
+    {
+        CALL_OUT("");
+        return true;
+    }
+    match = format_time_s.match(mcrTime);
+    if (match.hasMatch())
+    {
+        CALL_OUT("");
+        return true;
+    }
 
     CALL_OUT("");
-    return is_valid;
+    return false;
 }
 
 
@@ -3663,40 +3754,62 @@ double StringHelper::ConvertFStopToDouble(const QString mcFStop)
 ///////////////////////////////////////////////////////////////////////////////
 // Levenshtein distance
 int StringHelper::Distance(const QString & mcrLeftWord,
-    const QString & mcrRightWord)
+    const QString & mcrRightWord, const int mcMaxDistance)
 {
-    // No call tracing for performance purpose
+    CALL_IN(QString("mcrLeftWord=%1, mcrRightWord=%2, mcMaxDistance=%3")
+        .arg(CALL_SHOW(mcrLeftWord),
+             CALL_SHOW(mcrRightWord),
+             CALL_SHOW(mcMaxDistance)));
 
-    // Quick termination
-    if (mcrLeftWord == mcrRightWord)
+    int len1 = mcrLeftWord.size();
+    int len2 = mcrRightWord.size();
+
+    if (std::abs(len1 - len2) > mcMaxDistance)
+        return mcMaxDistance + 1;
+
+    QVector<int> prev(len2 + 1), curr(len2 + 1);
+
+    for (int j = 0; j <= len2; ++j)
+        prev[j] = j;
+
+    for (int i = 1; i <= len1; ++i)
     {
-        return 0;
-    }
-    if (mcrLeftWord.isEmpty())
-    {
-        return mcrRightWord.size();
-    }
-    if (mcrRightWord.isEmpty())
-    {
-        return mcrLeftWord.size();
+        curr[0] = i;
+        int minInRow = curr[0];
+
+        for (int j = 1; j <= len2; ++j)
+        {
+            int cost = (mcrLeftWord[i - 1] == mcrRightWord[j - 1]) ? 0 : 1;
+
+            curr[j] = std::min({
+                prev[j] + 1,        // deletion
+                curr[j - 1] + 1,    // insertion
+                prev[j - 1] + cost  // substitution
+            });
+
+            minInRow = std::min(minInRow, curr[j]);
+        }
+
+        if (minInRow > mcMaxDistance)
+            return mcMaxDistance + 1;
+
+        std::swap(prev, curr);
     }
 
-    // Check for cache hit
-    int distance = 0;
-    if (mcrLeftWord[0] == mcrRightWord[0])
-    {
-        distance =
-            Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1));
-    } else
-    {
-        int min_distance = Distance(mcrLeftWord.mid(1), mcrRightWord);
-        min_distance = qMin(min_distance,
-            Distance(mcrLeftWord, mcrRightWord.mid(1)));
-        min_distance = qMin(min_distance,
-            Distance(mcrLeftWord.mid(1), mcrRightWord.mid(1)));
-        distance = 1 + min_distance;
-    }
-
-    // Value is in cache
-    return distance;
+    CALL_OUT("");
+    return prev[len2];
 }
+
+
+
+// ================================================================ ANSI colors
+
+
+
+// ANSI colors
+// (see: https://stackoverflow.com/questions/4842424/
+//    list-of-ansi-color-escape-sequences)
+const QString StringHelper::ANSI_ResetColor = QString("\033[39m\033[49m");
+const QString StringHelper::ANSI_RedFont = QString("\033[31m");
+const QString StringHelper::ANSI_Bold = QString("\033[1m");
+const QString StringHelper::ANSI_ResetStyle =  QString("\033[0m");

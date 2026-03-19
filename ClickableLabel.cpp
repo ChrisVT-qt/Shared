@@ -26,6 +26,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDragEnterEvent>
+#include <QMimeData>
 
 
 
@@ -41,7 +42,22 @@ ClickableLabel::ClickableLabel()
     CALL_IN("");
     REGISTER_INSTANCE;
 
-    // Nothing to do
+    // Accept drops
+    setAcceptDrops(true);
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Constructor
+ClickableLabel::ClickableLabel(const QString & mcrText)
+    : ClickableLabel()
+{
+    CALL_IN("");
+
+    setText(mcrText);
 
     CALL_OUT("");
 }
@@ -110,6 +126,62 @@ void ClickableLabel::mouseDoubleClickEvent(QMouseEvent * mpEvent)
     mpEvent -> accept();
 
     emit DoubleClicked();
+
+    CALL_OUT("");
+}
+
+
+
+// ================================================================ Drag & Drop
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Drag in...
+void ClickableLabel::dragEnterEvent(QDragEnterEvent * mpEvent)
+{
+    CALL_IN(QString("mpEvent=%1")
+        .arg(CALL_SHOW(mpEvent)));
+
+    // Accept event
+    mpEvent -> accept();
+
+    // Bring window to front
+    activateWindow();
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// ... or leave
+void ClickableLabel::dragLeaveEvent(QDragLeaveEvent * mpEvent)
+{
+    CALL_IN(QString("mpEvent=%1")
+        .arg(CALL_SHOW(mpEvent)));
+
+    // We accept this event
+    mpEvent -> accept();
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// ... and drop
+void ClickableLabel::dropEvent(QDropEvent * mpEvent)
+{
+    CALL_IN(QString("mpEvent=%1")
+        .arg(CALL_SHOW(mpEvent)));
+
+    // Files dropped
+    mpEvent -> accept();
+
+    // Let outside world know
+    const QMimeData * mime_data = mpEvent -> mimeData();
+    emit DroppedURIs(mime_data);
 
     CALL_OUT("");
 }

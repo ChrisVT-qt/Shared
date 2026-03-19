@@ -244,6 +244,12 @@ public:
     static QStringList ConvertToString(const QSet < int > & mcrSet);
     static QList < int > ConvertToInt(const QStringList & mcrList);
 
+    // Text starting with a letter
+    static bool StartsWithLetter(const QString & mcrText);
+
+    // Text starting with a digit
+    static bool StartsWithDigit(const QString & mcrText);
+
 
 
     // ========================================================== Format stuff
@@ -273,7 +279,16 @@ public:
 public:
     // Levenshtein distance
     static int Distance(const QString & mcrLeftWord,
-        const QString & mcrRightWord);
+        const QString & mcrRightWord, const int mcMaxDistance = INT_MAX);
+
+
+    // ============================================================ ANSI colors
+public:
+    // ANSI colors
+    static const QString ANSI_ResetColor;
+    static const QString ANSI_RedFont;
+    static const QString ANSI_Bold;
+    static const QString ANSI_ResetStyle;
 };
 
 #endif
