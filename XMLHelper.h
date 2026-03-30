@@ -49,6 +49,10 @@ public:
         QDomElement mParentElement, const QString mcTagName,
         const QString mcAttribute = "", const QString mcAttributeValue = "");
 
+    // Get all child elements
+    static QList < QDomElement > GetChildElementsByName(
+        QDomElement mParentElement, const QString & mcrTagName);
+
     // Convert the contents of a tag to HTML
     static QString ConvertToHTML(const QDomElement mcElement,
         const QSet < QString > mcSuppressTags = QSet < QString >());

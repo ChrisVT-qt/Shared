@@ -238,6 +238,40 @@ QList < QDomElement > XMLHelper::FindAllMatchingElements(
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Get all child elements
+QList < QDomElement > XMLHelper::GetChildElementsByName(
+    QDomElement mParentElement, const QString & mcrTagName)
+{
+    CALL_IN(QString("mParentElement=%1, mcrTagName=%2")
+        .arg(CALL_SHOW(mParentElement),
+             CALL_SHOW(mcrTagName)));
+
+    // QDomElement::getElementsByTagName() gets ALL elements with the given
+    // tag name, not only the immediate child elements; this is why we need
+    // this function.
+
+    QList < QDomElement > child_elements;
+    for (QDomNode dom_child = mParentElement.firstChild();
+         !dom_child.isNull();
+         dom_child = dom_child.nextSibling())
+    {
+        if (!dom_child.isElement())
+        {
+            continue;
+        }
+        QDomElement dom_element = dom_child.toElement();
+        if (dom_element.tagName() == mcrTagName)
+        {
+            child_elements << dom_element;
+        }
+    }
+
+    CALL_OUT("");
+    return child_elements;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Convert the contents of a tag to HTML
 QString XMLHelper::ConvertToHTML(const QDomElement mcElement,
     const QSet < QString > mcSuppressTags)
