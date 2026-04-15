@@ -1938,6 +1938,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 12 Pro"] = "iPhone 12 Pro";
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
     m_CameraModelMapper["Apple.iPhone 15"] = "iPhone 15";
+    m_CameraModelMapper["Apple.iPhone 15 Pro"] = "iPhone 15 Pro";
     m_CameraModelMapper["Apple.iPhone 15 Pro Max"] = "iPhone 15 Pro Max";
     m_CameraModelMapper["Apple.iPhone 16"] = "iPhone 16";
     m_CameraModelMapper["Apple.iPhone 16e"] = "iPhone 16e";
@@ -2679,10 +2680,13 @@ void ExifInfo::Init_LensModelMapper()
     m_LensModelMapper["Apple.iPhone 12 Pro Max back camera 5.1mm f/1.6"] =
         "Apple iPhone 12 Pro Max Back Camera 5.1mm f/1.6";
     m_LensModelMapper["Apple.iPhone 15 back dual wide camera 5.96mm f/1.6"] =
-        "Apple iPhone 15 back dual wide camera 5.96mm f/1.6";
+        "Apple iPhone 15 back Dual Wide Camera 5.96mm f/1.6";
+    m_LensModelMapper["Apple.iPhone 15 Pro back triple camera 6.765mm "
+        "f/1.78"] =
+        "Apple.iPhone 15 Pro Back Triple Camera 6.765mm f/1.78";
     m_LensModelMapper["Apple.iPhone 15 Pro Max back triple camera 6.765mm "
         "f/1.78"] =
-        "Apple iPhone 15 Pro Max back triple camera 6.765mm f/1.78";
+        "Apple iPhone 15 Pro Max Back Triple Camera 6.765mm f/1.78";
     m_LensModelMapper["Apple.iPhone 16e back camera 4.2mm f/1.64"] =
         "Apple iPhone 16e Back Camera 4.2mm f/1.64";
     m_LensModelMapper["Apple.iPhone 16e front camera 2.69mm f/1.9"] =

@@ -62,11 +62,17 @@ public:
         const QString & mcrIndent = " ");
     static QString PrettyPrintXML(const QDomElement mcXML,
         const QString & mcrIndent = " ");
-
 private:
     static void PrettyPrintXML_Rec(const QDomElement mcElement,
         const QString & mcrCurrentIndentation, const QString & mcrIndent,
         QString & mrOutput);
+
+public:
+    // Convert the tag to text
+    static QString ToString(const QDomElement mcElement,
+        const bool mcIgnoreRootTag = false);
+private:
+    static void ToString_Rec(const QDomElement mcElement, QString & mrOutput);
 
 public:
     // Copy DOM to another document

@@ -439,6 +439,79 @@ void XMLHelper::PrettyPrintXML_Rec(const QDomElement mcElement,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Convert the tag to text
+QString XMLHelper::ToString(const QDomElement mcElement,
+    const bool mcIgnoreRootTag)
+{
+    CALL_IN(QString("mcElement=%1, mcIgnoreRootTag=%2")
+        .arg(CALL_SHOW(mcElement),
+             CALL_SHOW(mcIgnoreRootTag)));
+
+    QString xml;
+    ToString_Rec(mcElement, xml);
+
+    CALL_OUT("");
+    return xml;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Convert the tag to text (recursive part)
+void XMLHelper::ToString_Rec(const QDomElement mcElement, QString & mrOutput)
+{
+    CALL_IN(QString("mcElement=%1, mrOutput=%2")
+        .arg(CALL_SHOW(mcElement),
+             CALL_SHOW(mrOutput)));
+
+    // == This tag
+    QStringList attributes;
+    QDomNamedNodeMap all_attributes = mcElement.attributes();
+    for (int attr_index = 0;
+         attr_index < all_attributes.count();
+         attr_index++)
+    {
+        const QDomAttr dom_attribute =
+            all_attributes.item(attr_index).toAttr();
+        attributes += QString("%1=\"%2\"")
+            .arg(dom_attribute.name(),
+                 dom_attribute.value());
+    }
+    std::sort(attributes.begin(), attributes.end());
+    const bool has_children = mcElement.hasChildNodes();
+    mrOutput += QString("<%1%2%3%4>")
+        .arg(mcElement.tagName(),
+             attributes.isEmpty() ? "" : " ",
+             attributes.join(" "),
+             has_children ? "" : "/");
+
+    if (has_children)
+    {
+        // == Subtags
+        for (QDomNode dom_child = mcElement.firstChild();
+             !dom_child.isNull();
+             dom_child = dom_child.nextSibling())
+        {
+            if (dom_child.isText())
+            {
+                mrOutput += dom_child.toText().data();
+            } else if (dom_child.isElement())
+            {
+                ToString_Rec(dom_child.toElement(), mrOutput);
+            }
+        }
+
+        // == Close tag
+        mrOutput += QString("</%1>")
+            .arg(mcElement.tagName());
+    }
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Copy DOM to another document
 bool XMLHelper::Copy(const QDomElement & mcrSourceDOM,
     QDomElement & mrDOMParent, const bool mcIgnoreSourceTagName)

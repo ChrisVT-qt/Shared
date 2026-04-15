@@ -565,7 +565,7 @@ void MediaPlayer::NextFile()
         (m_PlayList_CurrentIndex == m_PlayList_Indices.last());
     if (was_last_file)
     {
-        PlayPlayListIndex(0);
+        PlayPlayListIndex(m_PlayList_Indices.first());
     } else
     {
         const int index_in_list =
@@ -771,7 +771,7 @@ void MediaPlayer::ReplayPositionChanged(const qint64 mcNewPosition)
                 case Repeat_All:
                     if (was_last_file)
                     {
-                        PlayPlayListIndex(0);
+                        PlayPlayListIndex(m_PlayList_Indices.first());
                     } else
                     {
                         NextFile();
@@ -953,10 +953,17 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
     }
 
     // Original width and height
-    const int original_width =
+    int original_width =
         meta_data.value(QMediaMetaData::Resolution).toSize().width();
-    const int original_height =
+    int original_height =
         meta_data.value(QMediaMetaData::Resolution).toSize().height();
+    const int orientation =
+        meta_data.value(QMediaMetaData::Orientation).toInt();
+    if (orientation == 90 ||
+        orientation == 270)
+    {
+        qSwap(original_width, original_height);
+    }
 
     // Add media data
     const int new_index = m_PlayList_NextIndex++;
