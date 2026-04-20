@@ -2112,6 +2112,7 @@ void ExifInfo::Init_CameraModelMapper()
 
     // Google
     m_CameraModelMapper["Google.Pixel 6 Pro"] = "Pixel 6 Pro";
+    m_CameraModelMapper["Google.Pixel 10"] = "Pixel 10";
 
     // Kodak
     m_CameraModelMapper["Kodak.KODAK EASYSHARE C182 Digital Camera"] =
@@ -2453,6 +2454,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.Digimax L60"] = "Digimax L60";
     m_CameraModelMapper["Samsung.Galaxy S23 Ultra"] = "Galaxy S23 Ultra";
     m_CameraModelMapper["Samsung.Galaxy S24 Ultra"] = "Galaxy S24 Ultra";
+    m_CameraModelMapper["Samsung.Galaxy S25 FE"] = "Galaxy S25 FE";
     m_CameraModelMapper["Samsung.Galaxy S25 Ultra"] = "Galaxy S25 Ultra";
     m_CameraModelMapper["Samsung.GT-I9100"] = "Galaxy S II GT-I9100";
     m_CameraModelMapper["Samsung.GT-I9295"] = "Galaxy S IV Active GT-I9295";
@@ -2756,6 +2758,8 @@ void ExifInfo::Init_LensModelMapper()
     // Google
     m_LensModelMapper["Google.Pixel 6 Pro back camera 6.81mm f/1.85"] =
         "Google Pixel 6 Pro Back Camera 6.81mm f/1.85";
+    m_LensModelMapper["Google.Pixel 10 back camera 4.53mm f/1.7"] =
+        "Google Pixel 10 Back Camera 4.53mm f/1.7";
 
     // Nikon
     m_LensModelMapper["Nikon.AF-S NIKKOR 180-400mm f/4E TC1.4 FL ED VR"] =
@@ -3121,6 +3125,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["514/100"] = "5.1";
     m_FocalLengthMapper["523/100"] = "5.2";
     m_FocalLengthMapper["535/100"] = "5.4";
+    m_FocalLengthMapper["540/100"] = "5.4";
     m_FocalLengthMapper["543/100"] = "5.4";
     m_FocalLengthMapper["570/100"] = "5.7";
     m_FocalLengthMapper["580/100"] = "5.8";
@@ -3166,6 +3171,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["15000/100"] = "150";
 
     m_FocalLengthMapper["755/128"] = "5.9";
+
     m_FocalLengthMapper["3971/256"] = "15.5";
 
     m_FocalLengthMapper["2940/1000"] = "2.9";
@@ -3180,6 +3186,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["4442/1000"] = "4.4";
     m_FocalLengthMapper["4499/1000"] = "4.5";
     m_FocalLengthMapper["4500/1000"] = "4.5";
+    m_FocalLengthMapper["4530/1000"] = "4.5";
     m_FocalLengthMapper["4600/1000"] = "4.6";
     m_FocalLengthMapper["4710/1000"] = "4.7";
     m_FocalLengthMapper["4740/1000"] = "4.7";
@@ -3341,6 +3348,7 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["3261/100000"] = "1/31";
     m_ExposureTimeMapper["4000/1000000"] = "1/250";
     m_ExposureTimeMapper["5000/1000000"] = "1/200";
+    m_ExposureTimeMapper["5825/1000000"] = "1/172";
     m_ExposureTimeMapper["8000/1000000"] = "1/125";
     m_ExposureTimeMapper["8335/1000000"] = "1/12";
     m_ExposureTimeMapper["8400/1000000"] = "1/12";
@@ -3380,6 +3388,7 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["6604300/1000000000"] = "1/151";
     m_ExposureTimeMapper["7845866/1000000000"] = "1/127";
     m_ExposureTimeMapper["8315366/1000000000"] = "1/120";
+    m_ExposureTimeMapper["8333333/1000000000"] = "1/120";
     m_ExposureTimeMapper["29997000/1000000000"] = "1/33";
     m_ExposureTimeMapper["40004000/1000000000"] = "1/25";
 
