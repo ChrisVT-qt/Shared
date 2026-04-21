@@ -258,6 +258,14 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
         }
     }
 
+    // Orientation
+    if (meta_keys.contains(QMediaMetaData::Orientation))
+    {
+        const int orientation =
+            media_metadata.value(QMediaMetaData::Orientation).toInt();
+        metadata[Metadata_Publisher] = QString::number(orientation);
+    }
+
     // Publisher
     if (meta_keys.contains(QMediaMetaData::Publisher))
     {

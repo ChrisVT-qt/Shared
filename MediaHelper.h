@@ -53,6 +53,7 @@ public:
         Metadata_LocalDirectory,
         Metadata_LocalFilename,
         Metadata_MIMEType,
+        Metadata_Orientation,
         Metadata_Publisher,
         Metadata_Title,
         Metadata_Url,

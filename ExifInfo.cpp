@@ -1901,6 +1901,7 @@ void ExifInfo::Init_CameraMakerMapper()
     m_CameraMakerMapper["SONY"] = "Sony";
     m_CameraMakerMapper["Sony Ericsson"] = "Sony Ericsson";
     m_CameraMakerMapper["Supra"] = "Supra";
+    m_CameraMakerMapper["TECNO"] = "TECNO";
     m_CameraMakerMapper["TOSHIBA"] = "Toshiba";
     m_CameraMakerMapper["Xiaomi"] = "Xiaomi";
     m_CameraMakerMapper["ZTE"] = "ZTE";
@@ -2571,6 +2572,9 @@ void ExifInfo::Init_CameraModelMapper()
     // Supra
     m_CameraModelMapper["Supra.Super Slim XS70"] = "Super Slim XS 70";
 
+    // TECNO
+    m_CameraModelMapper["TECNO.TECNO KM7k"] = "TECNO KM7k";
+
     // Toshiba
     m_CameraModelMapper["Toshiba.PDRM5"] = "PDR-M5";
 
@@ -2954,6 +2958,7 @@ void ExifInfo::Init_FStopMapper()
 
     m_FStopMapper["358/128"] = "2.8";
 
+    m_FStopMapper["1600/1000"] = "1.6";
     m_FStopMapper["3100/1000"] = "3.1";
 
     m_FStopMapper["17000/10000"] = "1.7";
@@ -3182,6 +3187,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["3820/1000"] = "3.8";
     m_FocalLengthMapper["3830/1000"] = "3.8";
     m_FocalLengthMapper["4000/1000"] = "4";
+    m_FocalLengthMapper["4090/1000"] = "4.1";
     m_FocalLengthMapper["4300/1000"] = "4.3";
     m_FocalLengthMapper["4442/1000"] = "4.4";
     m_FocalLengthMapper["4499/1000"] = "4.5";
@@ -3350,9 +3356,10 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["5000/1000000"] = "1/200";
     m_ExposureTimeMapper["5825/1000000"] = "1/172";
     m_ExposureTimeMapper["8000/1000000"] = "1/125";
-    m_ExposureTimeMapper["8335/1000000"] = "1/12";
-    m_ExposureTimeMapper["8400/1000000"] = "1/12";
-    m_ExposureTimeMapper["8904/1000000"] = "1/11";
+    m_ExposureTimeMapper["8335/1000000"] = "1/120";
+    m_ExposureTimeMapper["8400/1000000"] = "1/120";
+    m_ExposureTimeMapper["8904/1000000"] = "1/110";
+    m_ExposureTimeMapper["9995/1000000"] = "1/100";
     m_ExposureTimeMapper["9997/1000000"] = "1/100";
 
     m_ExposureTimeMapper["10000/1000000"] = "1/100";
