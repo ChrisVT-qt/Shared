@@ -448,7 +448,7 @@ QString XMLHelper::ToString(const QDomElement mcElement,
              CALL_SHOW(mcIgnoreRootTag)));
 
     QString xml;
-    ToString_Rec(mcElement, xml);
+    ToString_Rec(mcElement, xml, mcIgnoreRootTag);
 
     CALL_OUT("");
     return xml;
@@ -458,32 +458,37 @@ QString XMLHelper::ToString(const QDomElement mcElement,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Convert the tag to text (recursive part)
-void XMLHelper::ToString_Rec(const QDomElement mcElement, QString & mrOutput)
+void XMLHelper::ToString_Rec(const QDomElement mcElement, QString & mrOutput,
+    const bool mcIgnoreRootTag)
 {
-    CALL_IN(QString("mcElement=%1, mrOutput=%2")
+    CALL_IN(QString("mcElement=%1, mrOutput=%2, mcIgnoreRootTag=%3")
         .arg(CALL_SHOW(mcElement),
-             CALL_SHOW(mrOutput)));
+             CALL_SHOW(mrOutput),
+             CALL_SHOW(mcIgnoreRootTag)));
 
     // == This tag
-    QStringList attributes;
-    QDomNamedNodeMap all_attributes = mcElement.attributes();
-    for (int attr_index = 0;
-         attr_index < all_attributes.count();
-         attr_index++)
-    {
-        const QDomAttr dom_attribute =
-            all_attributes.item(attr_index).toAttr();
-        attributes += QString("%1=\"%2\"")
-            .arg(dom_attribute.name(),
-                 dom_attribute.value());
-    }
-    std::sort(attributes.begin(), attributes.end());
     const bool has_children = mcElement.hasChildNodes();
-    mrOutput += QString("<%1%2%3%4>")
-        .arg(mcElement.tagName(),
-             attributes.isEmpty() ? "" : " ",
-             attributes.join(" "),
-             has_children ? "" : "/");
+    if (!mcIgnoreRootTag)
+    {
+        QStringList attributes;
+        QDomNamedNodeMap all_attributes = mcElement.attributes();
+        for (int attr_index = 0;
+             attr_index < all_attributes.count();
+             attr_index++)
+        {
+            const QDomAttr dom_attribute =
+                all_attributes.item(attr_index).toAttr();
+            attributes += QString("%1=\"%2\"")
+                .arg(dom_attribute.name(),
+                     dom_attribute.value());
+        }
+        std::sort(attributes.begin(), attributes.end());
+        mrOutput += QString("<%1%2%3%4>")
+            .arg(mcElement.tagName(),
+                 attributes.isEmpty() ? "" : " ",
+                 attributes.join(" "),
+                 has_children ? "" : "/");
+    }
 
     if (has_children)
     {
@@ -502,8 +507,11 @@ void XMLHelper::ToString_Rec(const QDomElement mcElement, QString & mrOutput)
         }
 
         // == Close tag
-        mrOutput += QString("</%1>")
-            .arg(mcElement.tagName());
+        if (!mcIgnoreRootTag)
+        {
+            mrOutput += QString("</%1>")
+                .arg(mcElement.tagName());
+        }
     }
 
     CALL_OUT("");

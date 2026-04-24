@@ -72,7 +72,8 @@ public:
     static QString ToString(const QDomElement mcElement,
         const bool mcIgnoreRootTag = false);
 private:
-    static void ToString_Rec(const QDomElement mcElement, QString & mrOutput);
+    static void ToString_Rec(const QDomElement mcElement, QString & mrOutput,
+        const bool mcIgnoreRootTag = false);
 
 public:
     // Copy DOM to another document
