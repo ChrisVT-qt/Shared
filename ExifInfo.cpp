@@ -2808,7 +2808,7 @@ void ExifInfo::Init_LensModelMapper()
     m_LensModelMapper[".E 35mm F1.8 OSS"] = "Sony E 35mm f/1.8 OSS";
     m_LensModelMapper[".FE 70-200mm F4 G OSS"] = "Sony FE 70-200mm f/4 G OSS";
     m_LensModelMapper[".FE 200-600mm F5.6-6.3 G OSS"] =
-        "FE 200-600mm f/5.6-6.3 G OSS";
+        "Sony FE 200-600mm f/5.6-6.3 G OSS";
 
     // Tamron
     m_LensModelMapper[".E 17-70mm F2.8 B070"] = "Tamron 17-70mm f/2.8 B070";
