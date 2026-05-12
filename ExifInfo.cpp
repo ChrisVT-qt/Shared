@@ -1074,7 +1074,7 @@ QString ExifInfo::GetISORating() const
         // Initialize acceptable values
         acceptable_values
             << "16" << "32" << "64" << "125" << "250" << "500" << "1000"
-            << "2000"
+            << "2000" << "4000"
             << "20" << "40" << "80" << "160" << "320" << "640" << "1280"
             << "2500" << "5000"
             << "25" << "50" << "100" << "200" << "400" << "800" << "1600"
@@ -3057,6 +3057,7 @@ void ExifInfo::Init_FocalLengthMapper()
     m_FocalLengthMapper["2100/10"] = "210";
     m_FocalLengthMapper["2200/10"] = "220";
     m_FocalLengthMapper["2300/10"] = "230";
+    m_FocalLengthMapper["2320/10"] = "232";
     m_FocalLengthMapper["2400/10"] = "240";
     m_FocalLengthMapper["2800/10"] = "280";
     m_FocalLengthMapper["2900/10"] = "290";
