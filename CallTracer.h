@@ -161,6 +161,9 @@ public:
       */
     static void SetKeepAllHistory(const bool mcKeepHistory);
 
+    // Set maximum call depth
+    static void SetMaximumCallDepth(const int mcNewMaxCallDepth);
+
     /** \brief Records when a function is entered.
       * \param mcFilename Name of the source code file; \c __FILE__
       * is a good choice here
@@ -218,6 +221,9 @@ private:
       * Set it with \link SetKeepAllHistory()\endlink.
       */
     static bool m_KeepAllHistory;
+
+    // Maximum call depth
+    static int m_MaxCallDepth;
 
 
 

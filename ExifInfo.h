@@ -188,16 +188,12 @@ private:
     static void Init_CameraModelMapper();
     static void Init_LensMakerMapper();
     static void Init_LensModelMapper();
-    static void Init_FStopMapper();
-    static void Init_FocalLengthMapper();
     static void Init_ExposureTimeMapper();
 
     static QHash < QString, QString > m_CameraMakerMapper;
     static QHash < QString, QString > m_CameraModelMapper;
     static QHash < QString, QString > m_LensMakerMapper;
     static QHash < QString, QString > m_LensModelMapper;
-    static QHash < QString, QString > m_FStopMapper;
-    static QHash < QString, QString > m_FocalLengthMapper;
     static QHash < QString, QString > m_ExposureTimeMapper;
 
 

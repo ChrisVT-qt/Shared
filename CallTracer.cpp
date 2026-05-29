@@ -85,6 +85,15 @@ void CallTracer::SetKeepAllHistory(const bool mcKeepHistory)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Set maximum call depth
+void CallTracer::SetMaximumCallDepth(const int mcNewMaxCallDepth)
+{
+    m_MaxCallDepth = mcNewMaxCallDepth;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Enter function
 void CallTracer::EnterFunction(const QString mcFilename,
     const QString mcFunction, const QString mcParameters)
@@ -119,6 +128,20 @@ void CallTracer::EnterFunction(const QString mcFilename,
             .arg(m_CallStack_Time.last(),
                 m_CallStack_Method.last(),
                 m_CallStack_Text.last());
+    }
+
+    // Check if maximum depth has been reached
+    if (m_MaxCallDepth != -1 &&
+        m_CallStack_Method.size() > m_MaxCallDepth)
+    {
+        qDebug().noquote() << StringHelper::ANSI_RedFont;
+        qDebug().noquote()
+            << tr("ERROR: Maximum call depth (%1) exceeded.")
+                .arg(QString::number(m_MaxCallDepth));
+        qDebug().noquote() << tr("Callback stack:\n%1")
+            .arg(CALL_STACK());
+        qDebug().noquote() << StringHelper::ANSI_ResetColor;
+        exit(0);
     }
 }
 
@@ -250,6 +273,12 @@ QList < QString > CallTracer::m_CallStack_Text;
 ///////////////////////////////////////////////////////////////////////////////
 // Keeping history
 bool CallTracer::m_KeepAllHistory = false;
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Maximum call depth
+int CallTracer::m_MaxCallDepth = -1;
 
 
 
@@ -452,7 +481,8 @@ void CallTracer::RegisterInstance(void * mpInstance, const QString & mcrClass)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unregister an instance
-void CallTracer::UnregisterInstance(void * mpInstance, const QString & mcrClass)
+void CallTracer::UnregisterInstance(void * mpInstance,
+    const QString & mcrClass)
 {
     // Unregistration can only be from a destructor
     QStringList split_caller = m_CallStack_Method.last().split("::~");

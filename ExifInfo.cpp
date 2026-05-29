@@ -865,18 +865,8 @@ QString ExifInfo::GetExposureFocalLength() const
     if (m_ExifData.contains("Photo") &&
         m_ExifData["Photo"].contains("FocalLength"))
     {
-        QString length = m_ExifData["Photo"]["FocalLength"];
-        if (m_FocalLengthMapper.contains(length))
-        {
-            length = m_FocalLengthMapper[length];
-        } else
-        {
-            const QString reason = tr("%1: Focal length not in mapper: \"%2\"")
-                .arg(m_Filename,
-                     length);
-            MessageLogger::Message(CALL_METHOD, reason);
-            length = ConvertRational(length);
-        }
+        const QString length =
+            ConvertRational(m_ExifData["Photo"]["FocalLength"]);
 
         CALL_OUT("");
         return length;
@@ -916,29 +906,15 @@ QString ExifInfo::GetExposureFStop() const
             return QString();
         }
 
-        // Use mapper
-        if (m_FStopMapper.contains(f_stop))
+        // Convert rational
+        QString rational = ConvertRational(f_stop);
+        if (!rational.isEmpty())
         {
-            CALL_OUT("");
-            return "f/" + m_FStopMapper[f_stop];
-        } else
-        {
-            // Should be in mapper
-            const QString reason = tr("%1: F Stop \"%2\" is not in mapper.")
-                .arg(m_Filename,
-                     f_stop);
-            MessageLogger::Message(CALL_METHOD, reason);
-
-            // Convert rational
-            QString rational = ConvertRational(f_stop);
-            if (!rational.isEmpty())
-            {
-                rational = "f/" + rational;
-            }
-
-            CALL_OUT("");
-            return rational;
+            rational = "f/" + rational;
         }
+
+        CALL_OUT("");
+        return rational;
     }
 
     // !!! Could alternatively be Photo.ApertureValue
@@ -1820,8 +1796,6 @@ bool ExifInfo::InitializeMappers()
     Init_CameraModelMapper();
     Init_LensMakerMapper();
     Init_LensModelMapper();
-    Init_FStopMapper();
-    Init_FocalLengthMapper();
     Init_ExposureTimeMapper();
 
     CALL_OUT("");
@@ -1857,6 +1831,7 @@ void ExifInfo::Init_CameraMakerMapper()
     m_CameraMakerMapper["Hasselblad"] = "Hasselblad";
     m_CameraMakerMapper["Hewlett-Packard"] = "Hewlett-Packard";
     m_CameraMakerMapper["Hewlett-Packard"] = "Hewlett-Packard";
+    m_CameraMakerMapper["HONOR"] = "Honor";
     m_CameraMakerMapper["HP"] = "Hewlett-Packard";
     m_CameraMakerMapper["HTC"] = "HTC";
     m_CameraMakerMapper["HUAWEI"] = "Huawei";
@@ -2116,50 +2091,6 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Google.Pixel 6 Pro"] = "Pixel 6 Pro";
     m_CameraModelMapper["Google.Pixel 10"] = "Pixel 10";
 
-    // Kodak
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE C182 Digital Camera"] =
-        "EasyShare C182";
-    m_CameraModelMapper["Kodak.KODAK CX4200 DIGITAL CAMERA"] =
-        "EasyShare CX4200";
-    m_CameraModelMapper["Kodak.KODAK CX6330 ZOOM DIGITAL CAMERA"] =
-        "EasyShare CX6330 Zoom";
-    m_CameraModelMapper["Kodak.KODAK CX7330 ZOOM DIGITAL CAMERA"] =
-        "EasyShare CX7330 Zoom";
-    m_CameraModelMapper["Kodak.KODAK CX7530 ZOOM DIGITAL CAMERA"] =
-        "EasyShare CX7530 Zoom";
-    m_CameraModelMapper["Kodak.KODAK DX4330 DIGITAL CAMERA"] =
-        "EasyShare DX4330";
-    m_CameraModelMapper["Kodak.KODAK DX6490 ZOOM DIGITAL CAMERA"] =
-        "EasyShare DX6490 Zoom";
-    m_CameraModelMapper["Kodak.KODAK DX7440 ZOOM DIGITAL CAMERA"] =
-        "EasyShare DX7440 Zoom";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE C300 DIGITAL CAMERA"] =
-        "EasyShare C300";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE C743 ZOOM DIGITAL CAMERA"] =
-        "EasyShare C743 Zoom";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE C813 ZOOM DIGITAL CAMERA"] =
-        "EasyShare C813 Zoom";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE Camera, C1450"] =
-        "EasyShare C1450";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE M340 Digital Camera"] =
-        "EasyShare M340";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE M1063 DIGITAL CAMERA"] =
-        "EasyShare M1063";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE V1003 ZOOM DIGITAL CAMERA"] =
-        "EasyShare V1003 Zoom";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE V1073 DIGITAL CAMERA"] =
-        "EasyShare V1073";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z710 ZOOM DIGITAL CAMERA"] =
-        "EasyShare Z710 Zoom";
-    m_CameraModelMapper["Kodak.KODAK Z712 IS ZOOM DIGITAL CAMERA"] =
-        "EasyShare Z712 IS Zoom";
-    m_CameraModelMapper["Kodak.KODAK Z760 ZOOM DIGITAL CAMERA"] =
-        "EasyShare Z760 Zoom";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z915 DIGITAL CAMERA"] =
-        "EasyShare Z915 Zoom";
-    m_CameraModelMapper["Kodak.KODAK Z7590 ZOOM DIGITAL CAMERA"] =
-        "EasyShare Z7590 Zoom";
-
     // Epson
     m_CameraModelMapper["Epson.Expression 1640XL"] = "Expression 1640 XL";
     m_CameraModelMapper["Epson.GT-15000"] = "GT-15000";
@@ -2238,6 +2169,9 @@ void ExifInfo::Init_CameraModelMapper()
         "Deskjet F4200";
     m_CameraModelMapper["Hewlett-Packard.HP Scanjet e709n"] = "Scanjet 6500";
 
+    // Honor
+    m_CameraModelMapper["Honor.CRT-NX1"] = "90 Lite";
+
     // HTC
     m_CameraModelMapper["HTC.HTC Desire 626"] = "Desire 626";
     m_CameraModelMapper["HTC.HTC One"] = "One";
@@ -2247,17 +2181,59 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Huawei.HUAWEI GRA-L09"] = "P8 GRA-L09";
 
     // Kodak
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE C182 Digital Camera"] =
+        "EasyShare C182";
+    m_CameraModelMapper["Kodak.KODAK CX4200 DIGITAL CAMERA"] =
+        "EasyShare CX4200";
+    m_CameraModelMapper["Kodak.KODAK CX6330 ZOOM DIGITAL CAMERA"] =
+        "EasyShare CX6330 Zoom";
+    m_CameraModelMapper["Kodak.KODAK CX7330 ZOOM DIGITAL CAMERA"] =
+        "EasyShare CX7330 Zoom";
+    m_CameraModelMapper["Kodak.KODAK CX7530 ZOOM DIGITAL CAMERA"] =
+        "EasyShare CX7530 Zoom";
     m_CameraModelMapper["Kodak.DC200      (V02.20)"] = "DC200";
     m_CameraModelMapper["Kodak.KODAK DC280 ZOOM DIGITAL CAMERA"] =
         "DC280 Zoom";
     m_CameraModelMapper["Kodak.KODAK DC3800 DIGITAL CAMERA"] =
         "EasyShare DC3800";
-    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z1012 IS Digital Camera"] =
-        "EasyShare Z1012 IS";
+    m_CameraModelMapper["Kodak.KODAK DX4330 DIGITAL CAMERA"] =
+        "EasyShare DX4330";
+    m_CameraModelMapper["Kodak.KODAK DX6490 ZOOM DIGITAL CAMERA"] =
+        "EasyShare DX6490 Zoom";
+    m_CameraModelMapper["Kodak.KODAK DX7440 ZOOM DIGITAL CAMERA"] =
+        "EasyShare DX7440 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE C300 DIGITAL CAMERA"] =
+        "EasyShare C300";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE C743 ZOOM DIGITAL CAMERA"] =
+        "EasyShare C743 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE C813 ZOOM DIGITAL CAMERA"] =
+        "EasyShare C813 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE Camera, C1450"] =
+        "EasyShare C1450";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE M340 Digital Camera"] =
+        "EasyShare M340";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE M1063 DIGITAL CAMERA"] =
+        "EasyShare M1063";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE V1003 ZOOM DIGITAL CAMERA"] =
+        "EasyShare V1003 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE V1073 DIGITAL CAMERA"] =
+        "EasyShare V1073";
     m_CameraModelMapper["Kodak.KODAK V530 ZOOM DIGITAL CAMERA"] =
         "EasyShare V530 Zoom";
     m_CameraModelMapper["Kodak.KODAK Z650 ZOOM DIGITAL CAMERA"] =
         "EasyShare Z650 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z710 ZOOM DIGITAL CAMERA"] =
+        "EasyShare Z710 Zoom";
+    m_CameraModelMapper["Kodak.KODAK Z712 IS ZOOM DIGITAL CAMERA"] =
+        "EasyShare Z712 IS Zoom";
+    m_CameraModelMapper["Kodak.KODAK Z760 ZOOM DIGITAL CAMERA"] =
+        "EasyShare Z760 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z915 DIGITAL CAMERA"] =
+        "EasyShare Z915 Zoom";
+    m_CameraModelMapper["Kodak.KODAK EASYSHARE Z1012 IS Digital Camera"] =
+        "EasyShare Z1012 IS";
+    m_CameraModelMapper["Kodak.KODAK Z7590 ZOOM DIGITAL CAMERA"] =
+        "EasyShare Z7590 Zoom";
     m_CameraModelMapper["Kodak.PIXPRO FZ151"] = "PixPro FZ151";
 
     // Konica
@@ -2826,444 +2802,6 @@ void ExifInfo::Init_LensModelMapper()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// F Stop mapper
-void ExifInfo::Init_FStopMapper()
-{
-    CALL_IN("");
-
-    // For values from Photo.FNumber
-
-    m_FStopMapper["0/1"] = "";
-    m_FStopMapper["1/1"] = "1";
-    m_FStopMapper["2/1"] = "2";
-    m_FStopMapper["3/1"] = "3";
-    m_FStopMapper["4/1"] = "4";
-    m_FStopMapper["5/1"] = "5";
-    m_FStopMapper["8/1"] = "8";
-    m_FStopMapper["9/1"] = "9";
-    m_FStopMapper["10/1"] = "10";
-    m_FStopMapper["11/1"] = "11";
-    m_FStopMapper["12/1"] = "12";
-    m_FStopMapper["13/1"] = "13";
-    m_FStopMapper["14/1"] = "14";
-    m_FStopMapper["16/1"] = "16";
-    m_FStopMapper["18/1"] = "18";
-    m_FStopMapper["20/1"] = "20";
-    m_FStopMapper["22/1"] = "22";
-    m_FStopMapper["25/1"] = "25";
-    m_FStopMapper["29/1"] = "29";
-
-    m_FStopMapper["7/2"] = "3.5";
-    m_FStopMapper["9/2"] = "4.5";
-
-    m_FStopMapper["8/5"] = "1.6";
-    m_FStopMapper["9/5"] = "1.8";
-    m_FStopMapper["11/5"] = "2.2";
-    m_FStopMapper["12/5"] = "2.4";
-    m_FStopMapper["14/5"] = "2.8";
-    m_FStopMapper["28/5"] = "5.6";
-
-    m_FStopMapper["17/10"] = "1.7";
-    m_FStopMapper["18/10"] = "1.8";
-    m_FStopMapper["19/10"] = "1.9";
-    m_FStopMapper["20/10"] = "2";
-    m_FStopMapper["23/10"] = "2.3";
-    m_FStopMapper["24/10"] = "2.4";
-    m_FStopMapper["25/10"] = "2.5";
-    m_FStopMapper["26/10"] = "2.6";
-    m_FStopMapper["27/10"] = "2.7";
-    m_FStopMapper["28/10"] = "2.8";
-    m_FStopMapper["29/10"] = "2.9";
-    m_FStopMapper["30/10"] = "3";
-    m_FStopMapper["31/10"] = "3.1";
-    m_FStopMapper["32/10"] = "3.2";
-    m_FStopMapper["33/10"] = "3.3";
-    m_FStopMapper["34/10"] = "3.4";
-    m_FStopMapper["35/10"] = "3.5";
-    m_FStopMapper["36/10"] = "3.6";
-    m_FStopMapper["37/10"] = "3.7";
-    m_FStopMapper["38/10"] = "3.8";
-    m_FStopMapper["40/10"] = "4";
-    m_FStopMapper["41/10"] = "4.1";
-    m_FStopMapper["42/10"] = "4.2";
-    m_FStopMapper["43/10"] = "4.3";
-    m_FStopMapper["44/10"] = "4.4";
-    m_FStopMapper["45/10"] = "4.5";
-    m_FStopMapper["46/10"] = "4.6";
-    m_FStopMapper["47/10"] = "4.7";
-    m_FStopMapper["48/10"] = "4.8";
-    m_FStopMapper["49/10"] = "4.9";
-    m_FStopMapper["50/10"] = "5";
-    m_FStopMapper["51/10"] = "5.1";
-    m_FStopMapper["53/10"] = "5.3";
-    m_FStopMapper["56/10"] = "5.6";
-    m_FStopMapper["57/10"] = "5.7";
-    m_FStopMapper["58/10"] = "5.8";
-    m_FStopMapper["59/10"] = "5.9";
-    m_FStopMapper["63/10"] = "6.3";
-    m_FStopMapper["65/10"] = "6.5";
-    m_FStopMapper["66/10"] = "6.6";
-    m_FStopMapper["67/10"] = "6.7";
-    m_FStopMapper["70/10"] = "7.0";
-    m_FStopMapper["71/10"] = "7.1";
-    m_FStopMapper["74/10"] = "7.4";
-    m_FStopMapper["76/10"] = "7.6";
-    m_FStopMapper["77/10"] = "7.7";
-    m_FStopMapper["80/10"] = "8";
-    m_FStopMapper["81/10"] = "8.1";
-    m_FStopMapper["90/10"] = "9.0";
-    m_FStopMapper["95/10"] = "9.5";
-    m_FStopMapper["100/10"] = "10";
-    m_FStopMapper["110/10"] = "11";
-    m_FStopMapper["130/10"] = "13";
-    m_FStopMapper["180/10"] = "18";
-    m_FStopMapper["220/10"] = "22";
-    m_FStopMapper["250/10"] = "25";
-
-    m_FStopMapper["41/25"] = "1.6";
-
-    m_FStopMapper["150/100"] = "1.5";
-
-    m_FStopMapper["165/100"] = "1.7";
-    m_FStopMapper["170/100"] = "1.7";
-    m_FStopMapper["179/100"] = "1.8";
-    m_FStopMapper["180/100"] = "1.8";
-    m_FStopMapper["185/100"] = "1.9";
-    m_FStopMapper["189/100"] = "1.9";
-    m_FStopMapper["190/100"] = "1.9";
-    m_FStopMapper["200/100"] = "2";
-    m_FStopMapper["220/100"] = "2.2";
-    m_FStopMapper["240/100"] = "2.4";
-    m_FStopMapper["260/100"] = "2.6";
-    m_FStopMapper["265/100"] = "2.7";
-    m_FStopMapper["270/100"] = "2.7";
-    m_FStopMapper["280/100"] = "2.8";
-    m_FStopMapper["288/100"] = "2.9";
-    m_FStopMapper["310/100"] = "3.1";
-    m_FStopMapper["317/100"] = "3.2";
-    m_FStopMapper["330/100"] = "3.3";
-    m_FStopMapper["340/100"] = "3.4";
-    m_FStopMapper["350/100"] = "3.5";
-    m_FStopMapper["360/100"] = "3.6";
-    m_FStopMapper["380/100"] = "3.8";
-    m_FStopMapper["390/100"] = "3.9";
-    m_FStopMapper["400/100"] = "4";
-    m_FStopMapper["403/100"] = "4";
-    m_FStopMapper["425/100"] = "4.3";
-    m_FStopMapper["450/100"] = "4.5";
-    m_FStopMapper["470/100"] = "4.7";
-    m_FStopMapper["500/100"] = "5";
-    m_FStopMapper["550/100"] = "5.5";
-    m_FStopMapper["700/100"] = "7";
-    m_FStopMapper["800/100"] = "8";
-    m_FStopMapper["870/100"] = "8.7";
-    m_FStopMapper["900/100"] = "9";
-    m_FStopMapper["950/100"] = "9.5";
-    m_FStopMapper["970/100"] = "9.7";
-    m_FStopMapper["2200/100"] = "22";
-    m_FStopMapper["2800/1000"] = "28";
-
-    m_FStopMapper["358/128"] = "2.8";
-
-    m_FStopMapper["1600/1000"] = "1.6";
-    m_FStopMapper["3100/1000"] = "3.1";
-
-    m_FStopMapper["17000/10000"] = "1.7";
-    m_FStopMapper["19000/10000"] = "1.9";
-    m_FStopMapper["22000/10000"] = "2.2";
-    m_FStopMapper["24000/10000"] = "2.4";
-
-    m_FStopMapper["200000/100000"] = "2";
-    m_FStopMapper["240000/100000"] = "2.4";
-
-    m_FStopMapper["1244236/699009"] = "1.8";
-
-    m_FStopMapper["2000000/1000000"] = "2";
-    m_FStopMapper["4400000/1000000"] = "4.4";
-    m_FStopMapper["4500000/1000000"] = "4.5";
-
-    m_FStopMapper["6606029/1048576"] = "6.3";
-
-    m_FStopMapper["939524096/67108864"] = "14";
-
-    m_FStopMapper["4294967295/766958458"] = "5.6";
-    m_FStopMapper["4294967295/954437176"] = "4.5";
-
-    CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Focal length mapper
-void ExifInfo::Init_FocalLengthMapper()
-{
-    CALL_IN("");
-
-    m_FocalLengthMapper["0/1"] = "";
-
-
-    for (int counter = 3;
-         counter < 500;
-         counter++)
-    {
-        const QString key = QString::number(counter) + "/1";
-        m_FocalLengthMapper[key] = QString::number(counter);
-    }
-    m_FocalLengthMapper["500/1"] = "500";
-    m_FocalLengthMapper["550/1"] = "550";
-    m_FocalLengthMapper["560/1"] = "560";
-    m_FocalLengthMapper["600/1"] = "600";
-    m_FocalLengthMapper["840/1"] = "840";
-
-    m_FocalLengthMapper["11/2"] = "5.5";
-    m_FocalLengthMapper["15/2"] = "7.5";
-    m_FocalLengthMapper["17/2"] = "8.5";
-
-    m_FocalLengthMapper["17/4"] = "4.3";
-
-    m_FocalLengthMapper["21/5"] = "4.2";
-    m_FocalLengthMapper["24/5"] = "4.8";
-    m_FocalLengthMapper["29/5"] = "5.8";
-    m_FocalLengthMapper["33/5"] = "6.6";
-    m_FocalLengthMapper["67/5"] = "13.4";
-
-    for (int counter = 3;
-         counter < 500;
-         counter++)
-    {
-        const QString key = QString::number(counter) + "/10";
-        m_FocalLengthMapper[key] = QString::number(counter * .1);
-    }
-    m_FocalLengthMapper["500/10"] = "50";
-    m_FocalLengthMapper["550/10"] = "55";
-    m_FocalLengthMapper["559/10"] = "55.9";
-    m_FocalLengthMapper["570/10"] = "5.7";
-    m_FocalLengthMapper["600/10"] = "60";
-    m_FocalLengthMapper["608/10"] = "61";
-    m_FocalLengthMapper["630/10"] = "63";
-    m_FocalLengthMapper["684/10"] = "68.4";
-    m_FocalLengthMapper["693/10"] = "69.3";
-    m_FocalLengthMapper["700/10"] = "70";
-    m_FocalLengthMapper["736/10"] = "73.6";
-    m_FocalLengthMapper["850/10"] = "85";
-    m_FocalLengthMapper["870/10"] = "87";
-    m_FocalLengthMapper["1000/10"] = "100";
-    m_FocalLengthMapper["1040/10"] = "104";
-    m_FocalLengthMapper["1050/10"] = "105";
-    m_FocalLengthMapper["1100/10"] = "110";
-    m_FocalLengthMapper["1400/10"] = "140";
-    m_FocalLengthMapper["1500/10"] = "150";
-    m_FocalLengthMapper["1580/10"] = "158";
-    m_FocalLengthMapper["1600/10"] = "160";
-    m_FocalLengthMapper["1650/10"] = "165";
-    m_FocalLengthMapper["1750/10"] = "175";
-    m_FocalLengthMapper["1800/10"] = "180";
-    m_FocalLengthMapper["1850/10"] = "185";
-    m_FocalLengthMapper["2000/10"] = "200";
-    m_FocalLengthMapper["2100/10"] = "210";
-    m_FocalLengthMapper["2200/10"] = "220";
-    m_FocalLengthMapper["2300/10"] = "230";
-    m_FocalLengthMapper["2320/10"] = "232";
-    m_FocalLengthMapper["2400/10"] = "240";
-    m_FocalLengthMapper["2800/10"] = "280";
-    m_FocalLengthMapper["2900/10"] = "290";
-    m_FocalLengthMapper["3000/10"] = "300";
-    m_FocalLengthMapper["3100/10"] = "310";
-    m_FocalLengthMapper["3300/10"] = "330";
-    m_FocalLengthMapper["3400/10"] = "340";
-    m_FocalLengthMapper["3600/10"] = "360";
-    m_FocalLengthMapper["4000/10"] = "400";
-    m_FocalLengthMapper["4600/10"] = "460";
-    m_FocalLengthMapper["4900/10"] = "490";
-    m_FocalLengthMapper["5000/10"] = "500";
-    m_FocalLengthMapper["5500/10"] = "550";
-    m_FocalLengthMapper["5600/10"] = "560";
-    m_FocalLengthMapper["6000/10"] = "600";
-    m_FocalLengthMapper["8500/10"] = "850";
-
-    m_FocalLengthMapper["125/16"] = "7.8";
-
-    m_FocalLengthMapper["31/20"] = "1.6";
-    m_FocalLengthMapper["53/20"] = "2.7";
-    m_FocalLengthMapper["77/20"] = "3.9";
-    m_FocalLengthMapper["83/20"] = "4.2";
-    m_FocalLengthMapper["2259/20"] = "113";
-
-    m_FocalLengthMapper["103/25"] = "4.1";
-    m_FocalLengthMapper["107/25"] = "4.3";
-    m_FocalLengthMapper["149/25"] = "6.0";
-
-    m_FocalLengthMapper["173/32"] = "5.4";
-    m_FocalLengthMapper["186/32"] = "5.8";
-    m_FocalLengthMapper["189/32"] = "5.9";
-    m_FocalLengthMapper["224/32"] = "7";
-    m_FocalLengthMapper["227/32"] = "7.1";
-    m_FocalLengthMapper["250/32"] = "7.8";
-    m_FocalLengthMapper["301/32"] = "9.4";
-    m_FocalLengthMapper["314/32"] = "9.8";
-    m_FocalLengthMapper["342/32"] = "10.7";
-    m_FocalLengthMapper["362/32"] = "11.3";
-    m_FocalLengthMapper["400/32"] = "12.5";
-    m_FocalLengthMapper["461/32"] = "14.4";
-    m_FocalLengthMapper["682/32"] = "21.3";
-
-    m_FocalLengthMapper["0/100"] = "";
-    m_FocalLengthMapper["220/100"] = "2.2";
-    m_FocalLengthMapper["271/100"] = "2.7";
-    m_FocalLengthMapper["279/100"] = "2.8";
-    m_FocalLengthMapper["290/100"] = "2.9";
-    m_FocalLengthMapper["331/100"] = "3.3";
-    m_FocalLengthMapper["350/100"] = "3.5";
-    m_FocalLengthMapper["354/100"] = "3.5";
-    m_FocalLengthMapper["360/100"] = "3.6";
-    m_FocalLengthMapper["369/100"] = "3.7";
-    m_FocalLengthMapper["370/100"] = "3.7";
-    m_FocalLengthMapper["382/100"] = "3.8";
-    m_FocalLengthMapper["399/100"] = "4";
-    m_FocalLengthMapper["403/100"] = "4";
-    m_FocalLengthMapper["405/100"] = "4.1";
-    m_FocalLengthMapper["410/100"] = "4.1";
-    m_FocalLengthMapper["413/100"] = "4.1";
-    m_FocalLengthMapper["420/100"] = "4.2";
-    m_FocalLengthMapper["425/100"] = "4.3";
-    m_FocalLengthMapper["430/100"] = "4.3";
-    m_FocalLengthMapper["431/100"] = "4.3";
-    m_FocalLengthMapper["442/100"] = "4.4";
-    m_FocalLengthMapper["460/100"] = "4.6";
-    m_FocalLengthMapper["467/100"] = "4.7";
-    m_FocalLengthMapper["480/100"] = "4.8";
-    m_FocalLengthMapper["490/100"] = "4.9";
-    m_FocalLengthMapper["500/100"] = "5";
-    m_FocalLengthMapper["514/100"] = "5.1";
-    m_FocalLengthMapper["523/100"] = "5.2";
-    m_FocalLengthMapper["535/100"] = "5.4";
-    m_FocalLengthMapper["540/100"] = "5.4";
-    m_FocalLengthMapper["543/100"] = "5.4";
-    m_FocalLengthMapper["570/100"] = "5.7";
-    m_FocalLengthMapper["580/100"] = "5.8";
-    m_FocalLengthMapper["585/100"] = "5.9";
-    m_FocalLengthMapper["587/100"] = "5.9";
-    m_FocalLengthMapper["590/100"] = "5.9";
-    m_FocalLengthMapper["591/100"] = "5.9";
-    m_FocalLengthMapper["600/100"] = "6";
-    m_FocalLengthMapper["610/100"] = "6.1";
-    m_FocalLengthMapper["620/100"] = "6.2";
-    m_FocalLengthMapper["630/100"] = "6.3";
-    m_FocalLengthMapper["633/100"] = "6.3";
-    m_FocalLengthMapper["640/100"] = "6.4";
-    m_FocalLengthMapper["650/100"] = "6.5";
-    m_FocalLengthMapper["660/100"] = "6.6";
-    m_FocalLengthMapper["663/100"] = "6.6";
-    m_FocalLengthMapper["670/100"] = "6.7";
-    m_FocalLengthMapper["750/100"] = "7.5";
-    m_FocalLengthMapper["780/100"] = "7.8";
-    m_FocalLengthMapper["790/100"] = "7.9";
-    m_FocalLengthMapper["800/100"] = "8";
-    m_FocalLengthMapper["820/100"] = "8.2";
-    m_FocalLengthMapper["840/100"] = "8.4";
-    m_FocalLengthMapper["882/100"] = "8.8";
-    m_FocalLengthMapper["1100/100"] = "11";
-    m_FocalLengthMapper["1270/100"] = "12.7";
-    m_FocalLengthMapper["1510/100"] = "15.1";
-    m_FocalLengthMapper["1700/100"] = "17";
-    m_FocalLengthMapper["1712/100"] = "17.1";
-    m_FocalLengthMapper["1820/100"] = "18.2";
-    m_FocalLengthMapper["1860/100"] = "18.6";
-    m_FocalLengthMapper["2300/100"] = "23";
-    m_FocalLengthMapper["2510/100"] = "25.1";
-    m_FocalLengthMapper["3400/100"] = "34";
-    m_FocalLengthMapper["3500/100"] = "35";
-    m_FocalLengthMapper["4500/100"] = "45";
-    m_FocalLengthMapper["4750/100"] = "47.5";
-    m_FocalLengthMapper["5000/100"] = "50";
-    m_FocalLengthMapper["5300/100"] = "53";
-    m_FocalLengthMapper["5500/100"] = "55";
-    m_FocalLengthMapper["5600/100"] = "56";
-    m_FocalLengthMapper["6330/100"] = "63.3";
-    m_FocalLengthMapper["15000/100"] = "150";
-
-    m_FocalLengthMapper["755/128"] = "5.9";
-
-    m_FocalLengthMapper["3971/256"] = "15.5";
-
-    m_FocalLengthMapper["2940/1000"] = "2.9";
-    m_FocalLengthMapper["3097/1000"] = "3.1";
-    m_FocalLengthMapper["3170/1000"] = "3.2";
-    m_FocalLengthMapper["3200/1000"] = "3.2";
-    m_FocalLengthMapper["3620/1000"] = "3.6";
-    m_FocalLengthMapper["3820/1000"] = "3.8";
-    m_FocalLengthMapper["3830/1000"] = "3.8";
-    m_FocalLengthMapper["4000/1000"] = "4";
-    m_FocalLengthMapper["4090/1000"] = "4.1";
-    m_FocalLengthMapper["4300/1000"] = "4.3";
-    m_FocalLengthMapper["4442/1000"] = "4.4";
-    m_FocalLengthMapper["4499/1000"] = "4.5";
-    m_FocalLengthMapper["4500/1000"] = "4.5";
-    m_FocalLengthMapper["4530/1000"] = "4.5";
-    m_FocalLengthMapper["4600/1000"] = "4.6";
-    m_FocalLengthMapper["4710/1000"] = "4.7";
-    m_FocalLengthMapper["4740/1000"] = "4.7";
-    m_FocalLengthMapper["5000/1000"] = "5";
-    m_FocalLengthMapper["5400/1000"] = "5.4";
-    m_FocalLengthMapper["5583/1000"] = "5.6";
-    m_FocalLengthMapper["5700/1000"] = "5.7";
-    m_FocalLengthMapper["5800/1000"] = "5.8";
-    m_FocalLengthMapper["5854/1000"] = "5.9";
-    m_FocalLengthMapper["5900/1000"] = "5.9";
-    m_FocalLengthMapper["5989/1000"] = "6";
-    m_FocalLengthMapper["6000/1000"] = "6";
-    m_FocalLengthMapper["6100/1000"] = "6.1";
-    m_FocalLengthMapper["6190/1000"] = "6.2";
-    m_FocalLengthMapper["6200/1000"] = "6.2";
-    m_FocalLengthMapper["6300/1000"] = "6.3";
-    m_FocalLengthMapper["6447/1000"] = "6.4";
-    m_FocalLengthMapper["6600/1000"] = "6.6";
-    m_FocalLengthMapper["6769/1000"] = "6.8";
-    m_FocalLengthMapper["6810/1000"] = "6.8";
-    m_FocalLengthMapper["7300/1000"] = "7.3";
-    m_FocalLengthMapper["7400/1000"] = "7.4";
-    m_FocalLengthMapper["7700/1000"] = "7.7";
-    m_FocalLengthMapper["7947/1000"] = "7.9";
-    m_FocalLengthMapper["8205/1000"] = "8.2";
-    m_FocalLengthMapper["9954/1000"] = "10";
-    m_FocalLengthMapper["12074/1000"] = "12.1";
-    m_FocalLengthMapper["12669/1000"] = "12.7";
-    m_FocalLengthMapper["12845/1000"] = "12.8";
-    m_FocalLengthMapper["13300/1000"] = "13.3";
-    m_FocalLengthMapper["13600/1000"] = "13.6";
-    m_FocalLengthMapper["14783/1000"] = "14.8";
-    m_FocalLengthMapper["14900/1000"] = "14.9";
-    m_FocalLengthMapper["14926/1000"] = "14.9";
-    m_FocalLengthMapper["15673/1000"] = "15.7";
-    m_FocalLengthMapper["20000/1000"] = "20";
-    m_FocalLengthMapper["20100/1000"] = "20.1";
-    m_FocalLengthMapper["21556/1000"] = "21.6";
-    m_FocalLengthMapper["23280/1000"] = "23.3";
-    m_FocalLengthMapper["34900/1000"] = "34.9";
-    m_FocalLengthMapper["44400/1000"] = "44.4";
-    m_FocalLengthMapper["50000/1000"] = "50";
-    m_FocalLengthMapper["72000/1000"] = "72";
-
-    m_FocalLengthMapper["251773/37217"] = "6.7";
-
-    m_FocalLengthMapper["2497280/65536"] = "38.1";
-
-    m_FocalLengthMapper["469865/174671"] = "2.7";
-
-    m_FocalLengthMapper["3302983/524283"] = "6.3";
-
-    m_FocalLengthMapper["880803840/8388608"] = "105";
-
-    m_FocalLengthMapper["6300000/1000000"] = "6.3";
-    m_FocalLengthMapper["150000000/1000000"] = "150";
-
-    CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Exposure time mapper
 void ExifInfo::Init_ExposureTimeMapper()
 {
@@ -3427,10 +2965,6 @@ QHash < QString, QString > ExifInfo::m_LensMakerMapper =
     QHash < QString, QString >();
 QHash < QString, QString > ExifInfo::m_LensModelMapper =
     QHash < QString, QString >();
-QHash < QString, QString > ExifInfo::m_FStopMapper =
-    QHash < QString, QString >();
-QHash < QString, QString > ExifInfo::m_FocalLengthMapper =
-    QHash < QString, QString >();
 QHash < QString, QString > ExifInfo::m_ExposureTimeMapper =
     QHash < QString, QString >();
 
@@ -3551,20 +3085,6 @@ void ExifInfo::RegisterData()
                 if(!m_LensModelMapper.contains(model))
                 {
                     m_NewMapperValues["LensModel"] += model;
-                }
-            }
-            if (key == "Photo.FNumber")
-            {
-                if (!m_FStopMapper.contains(value))
-                {
-                    m_NewMapperValues["FStop"] += value;
-                }
-            }
-            if (key == "Photo.FocalLength")
-            {
-                if (!m_FocalLengthMapper.contains(value))
-                {
-                    m_NewMapperValues["FocalLength"] += value;
                 }
             }
             if (key == "Photo.ExposureTime")
