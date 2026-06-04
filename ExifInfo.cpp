@@ -1044,32 +1044,14 @@ QString ExifInfo::GetISORating() const
 {
     CALL_IN("");
 
-    static QSet < QString > acceptable_values;
-    if (acceptable_values.isEmpty())
-    {
-        // Initialize acceptable values
-        acceptable_values
-            << "16" << "32" << "64" << "125" << "250" << "500" << "1000"
-            << "2000" << "4000"
-            << "20" << "40" << "80" << "160" << "320" << "640" << "1280"
-            << "2500" << "5000"
-            << "25" << "50" << "100" << "200" << "400" << "800" << "1600"
-            << "3200" << "6400" << "12800";
-    }
-
     // Check if we have this information
     if (m_ExifData.contains("Photo") &&
         m_ExifData["Photo"].contains("ISOSpeedRatings"))
     {
-        const QString iso = m_ExifData["Photo"]["ISOSpeedRatings"];
-        if (!acceptable_values.contains(iso))
+        QString iso = m_ExifData["Photo"]["ISOSpeedRatings"];
+        if (iso == "0")
         {
-            const QString reason = tr("Unknown ISO speed rating: %1 (%2)")
-                .arg(iso,
-                    m_Filename);
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return iso;
+            iso = "";
         }
 
         CALL_OUT("");

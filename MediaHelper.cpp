@@ -82,6 +82,7 @@ QStringList MediaHelper::ToHumanReadable(
         mapper[Metadata_LocalDirectory] = "Local Directory";
         mapper[Metadata_LocalFilename] = "Local Filename";
         mapper[Metadata_MIMEType] = "MIME Type";
+        mapper[Metadata_Orientation] = "Orientation";
         mapper[Metadata_Publisher] = "Publisher";
         mapper[Metadata_Title] = "Title";
         mapper[Metadata_Url] = "URL";
@@ -263,7 +264,7 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     {
         const int orientation =
             media_metadata.value(QMediaMetaData::Orientation).toInt();
-        metadata[Metadata_Publisher] = QString::number(orientation);
+        metadata[Metadata_Orientation] = QString::number(orientation);
     }
 
     // Publisher
