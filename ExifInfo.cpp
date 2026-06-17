@@ -1895,6 +1895,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone 12"] = "iPhone 12";
     m_CameraModelMapper["Apple.iPhone 12 Pro"] = "iPhone 12 Pro";
     m_CameraModelMapper["Apple.iPhone 12 Pro Max"] = "iPhone 12 Pro Max";
+    m_CameraModelMapper["Apple.iPhone 14"] = "iPhone 14";
     m_CameraModelMapper["Apple.iPhone 15"] = "iPhone 15";
     m_CameraModelMapper["Apple.iPhone 15 Plus"] = "iPhone 15 Plus";
     m_CameraModelMapper["Apple.iPhone 15 Pro"] = "iPhone 15 Pro";
@@ -2288,6 +2289,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Nikon.NIKON D5000"] = "D5000";
     m_CameraModelMapper["Nikon.NIKON D5100"] = "D5100";
     m_CameraModelMapper["Nikon.NIKON D5200"] = "D5200";
+    m_CameraModelMapper["Nikon.NIKON D5500"] = "D5500";
     m_CameraModelMapper["Nikon.NIKON D7000"] = "D7000";
     m_CameraModelMapper["Nikon.NIKON D7100"] = "D7100";
     m_CameraModelMapper["Nikon.E880"] = "Coolpix 880";
@@ -2644,6 +2646,8 @@ void ExifInfo::Init_LensModelMapper()
         "Apple iPhone 12 Pro Back Triple Camera 4.2mm f/1.6";
     m_LensModelMapper["Apple.iPhone 12 Pro Max back camera 5.1mm f/1.6"] =
         "Apple iPhone 12 Pro Max Back Camera 5.1mm f/1.6";
+    m_LensModelMapper["Apple.iPhone 14 back dual wide camera 5.7mm f/1.5"] =
+        "Apple iPhone 14 Back Dual Eide Camera 5.7mm f/1.5";
     m_LensModelMapper["Apple.iPhone 15 back dual wide camera 5.96mm f/1.6"] =
         "Apple iPhone 15 back Dual Wide Camera 5.96mm f/1.6";
     m_LensModelMapper["Apple.iPhone 15 Plus back dual wide camera 5.96mm "
@@ -2866,6 +2870,7 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["100/599"] = "1/6";
     m_ExposureTimeMapper["120/1"] = "120";
     m_ExposureTimeMapper["196/10000"] = "1/50";
+    m_ExposureTimeMapper["250/10000"] = "1/40";
     m_ExposureTimeMapper["285/10000"] = "1/35";
     m_ExposureTimeMapper["360/9450"] = "1/26";
     m_ExposureTimeMapper["400/10000"] = "1/25";

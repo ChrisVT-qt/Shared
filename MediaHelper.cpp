@@ -331,18 +331,8 @@ QHash < MediaHelper::Metadata, QString > MediaHelper::GetMediaMetadata(
     {
         const QSize size =
             media_metadata.value(QMediaMetaData::Resolution).toSize();
-        const int orientation =
-            media_metadata.value(QMediaMetaData::Orientation).toInt();
-        if (orientation == 90 ||
-            orientation == 270)
-        {
-            metadata[Metadata_Width] = QString::number(size.height());
-            metadata[Metadata_Height] = QString::number(size.width());
-        } else
-        {
-            metadata[Metadata_Width] = QString::number(size.width());
-            metadata[Metadata_Height] = QString::number(size.height());
-        }
+        metadata[Metadata_Width] = QString::number(size.width());
+        metadata[Metadata_Height] = QString::number(size.height());
     }
 
     // Audio bitrate

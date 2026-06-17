@@ -909,7 +909,7 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
                 error_text);
         MessageLogger::Error(CALL_METHOD, reason);
         CALL_OUT(reason);
-        return false;
+        return -1;
     }
 
     // Available keys
