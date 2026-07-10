@@ -2117,6 +2117,7 @@ void ExifInfo::Init_CameraModelMapper()
     // Google
     m_CameraModelMapper["Google.Nexus One"] = "Nexus One";
     m_CameraModelMapper["Google.Pixel 2"] = "Pixel 2";
+    m_CameraModelMapper["Google.Pixel 9 Pro"] = "Pixel 9 Pro";
 
     // Hasselblad
     m_CameraModelMapper["Hasselblad.Hasselblad H3D-39"] = "H3D-39";
@@ -2731,6 +2732,10 @@ void ExifInfo::Init_LensModelMapper()
     // Google
     m_LensModelMapper["Google.Pixel 6 Pro back camera 6.81mm f/1.85"] =
         "Google Pixel 6 Pro Back Camera 6.81mm f/1.85";
+    m_LensModelMapper["Google.Pixel 9 Pro back camera 2.02mm f/1.7"] =
+        "Google.Pixel 9 Pro back camera 2.02mm f/1.7";
+    m_LensModelMapper["Google.Pixel 9 Pro back camera 6.9mm f/1.68"] =
+        "Google.Pixel 9 Pro Back Camera 6.9mm f/1.68";
     m_LensModelMapper["Google.Pixel 10 back camera 4.53mm f/1.7"] =
         "Google Pixel 10 Back Camera 4.53mm f/1.7";
 
