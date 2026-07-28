@@ -963,19 +963,15 @@ QString ExifInfo::GetExposureTime() const
         {
             CALL_OUT("");
             return m_ExposureTimeMapper[exposure];
+        } else
+        {
+            // Just calculate the exposure time
+            QString rational = ConvertRational(exposure);
+            CALL_OUT("");
+            return rational;
         }
 
-        // Should be in mapper
-        const QString reason =
-            tr("%1: Exposure time \"%2\" is not in mapper.")
-            .arg(m_Filename,
-                 exposure);
-        MessageLogger::Message(CALL_METHOD, reason);
-
-        // Convert rational
-        QString rational = ConvertRational(exposure);
-        CALL_OUT("");
-        return rational;
+        // We never get here.
     }
 
     // !!! Could alternatively be Photo.ShutterSpeedValue
@@ -2806,45 +2802,26 @@ void ExifInfo::Init_ExposureTimeMapper()
 
     m_ExposureTimeMapper["2/1"] = "2";
     m_ExposureTimeMapper["2/39"] = "1/20";
-    m_ExposureTimeMapper["3/10"] = "0.3";
-    m_ExposureTimeMapper["4/10"] = "0.4";
-    m_ExposureTimeMapper["5/1"] = "5";
-    m_ExposureTimeMapper["5/2"] = "2.5";
     m_ExposureTimeMapper["5/10"] = "0.5";
     m_ExposureTimeMapper["5/300"] = "1/60";
-    m_ExposureTimeMapper["6/1"] = "6";
-    m_ExposureTimeMapper["6/10"] = "0.6";
-    m_ExposureTimeMapper["8/10"] = "0.8";
 
     m_ExposureTimeMapper["10/1"] = "10";
     m_ExposureTimeMapper["10/10"] = "1";
     m_ExposureTimeMapper["10/50"] = "1/5";
     m_ExposureTimeMapper["10/57"] = "1/6";
     m_ExposureTimeMapper["10/60"] = "1/6";
-    m_ExposureTimeMapper["10/70"] = "1/7";
     m_ExposureTimeMapper["10/80"] = "1/8";
     m_ExposureTimeMapper["10/100"] = "1/10";
-    m_ExposureTimeMapper["10/160"] = "1/16";
     m_ExposureTimeMapper["10/200"] = "1/20";
     m_ExposureTimeMapper["10/250"] = "1/25";
-    m_ExposureTimeMapper["10/300"] = "1/30";
-    m_ExposureTimeMapper["10/320"] = "1/32";
-    m_ExposureTimeMapper["10/340"] = "1/34";
-    m_ExposureTimeMapper["10/376"] = "1/38";
     m_ExposureTimeMapper["10/400"] = "1/40";
-    m_ExposureTimeMapper["10/450"] = "1/45";
     m_ExposureTimeMapper["10/500"] = "1/50";
     m_ExposureTimeMapper["10/600"] = "1/60";
     m_ExposureTimeMapper["10/601"] = "1/60";
     m_ExposureTimeMapper["10/603"] = "1/60";
-    m_ExposureTimeMapper["10/700"] = "1/70";
-    m_ExposureTimeMapper["10/750"] = "1/75";
     m_ExposureTimeMapper["10/800"] = "1/80";
-    m_ExposureTimeMapper["10/833"] = "1/83";
     m_ExposureTimeMapper["10/1000"] = "1/100";
-    m_ExposureTimeMapper["10/1050"] = "1/105";
     m_ExposureTimeMapper["10/1250"] = "1/125";
-    m_ExposureTimeMapper["10/1265"] = "1/127";
     m_ExposureTimeMapper["10/1600"] = "1/160";
     m_ExposureTimeMapper["10/2000"] = "1/200";
     m_ExposureTimeMapper["10/2500"] = "1/250";
@@ -2859,37 +2836,21 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["10/16000"] = "1/1600";
     m_ExposureTimeMapper["10/20000"] = "1/2000";
 
-    m_ExposureTimeMapper["13/1"] = "13";
-    m_ExposureTimeMapper["13/10"] = "1.3";
-    m_ExposureTimeMapper["15/1"] = "15";
-    m_ExposureTimeMapper["16/10"] = "1.6";
-    m_ExposureTimeMapper["20/1"] = "20";
-    m_ExposureTimeMapper["20/10"] = "2";
-    m_ExposureTimeMapper["25/10"] = "2.5";
     m_ExposureTimeMapper["30/1"] = "30";
-    m_ExposureTimeMapper["32/10"] = "3.2";
-    m_ExposureTimeMapper["36/100000"] = "1/2700";
-    m_ExposureTimeMapper["38/10"] = "3.8";
-    m_ExposureTimeMapper["89/1"] = "89";
 
     m_ExposureTimeMapper["100/599"] = "1/6";
     m_ExposureTimeMapper["120/1"] = "120";
     m_ExposureTimeMapper["196/10000"] = "1/50";
     m_ExposureTimeMapper["250/10000"] = "1/40";
-    m_ExposureTimeMapper["285/10000"] = "1/35";
-    m_ExposureTimeMapper["360/9450"] = "1/26";
     m_ExposureTimeMapper["400/10000"] = "1/25";
     m_ExposureTimeMapper["403/10"] = "40";
-    m_ExposureTimeMapper["416/10000"] = "1/24";
     m_ExposureTimeMapper["833/100000"] = "1/120";
-    m_ExposureTimeMapper["866/100000"] = "1/115";
 
     m_ExposureTimeMapper["1008/1000000"] = "1/1000";
     m_ExposureTimeMapper["1250/10000"] = "1/8";
     m_ExposureTimeMapper["1666/100000"] = "1/60";
     m_ExposureTimeMapper["2499/100000"] = "1/40";
     m_ExposureTimeMapper["3125/1000000"] = "1/300";
-    m_ExposureTimeMapper["3261/100000"] = "1/31";
     m_ExposureTimeMapper["4000/1000000"] = "1/250";
     m_ExposureTimeMapper["5000/1000000"] = "1/200";
     m_ExposureTimeMapper["5825/1000000"] = "1/172";
@@ -2901,7 +2862,6 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["9997/1000000"] = "1/100";
 
     m_ExposureTimeMapper["10000/1000000"] = "1/100";
-    m_ExposureTimeMapper["10000/3367003"] = "1/337";
     m_ExposureTimeMapper["15625/1000000"] = "1/64";
     m_ExposureTimeMapper["16667/1000000"] = "1/60";
     m_ExposureTimeMapper["20000/1000000"] = "1/50";
@@ -2909,16 +2869,10 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["20166/1000000"] = "1/50";
     m_ExposureTimeMapper["20339/1000000"] = "1/50";
     m_ExposureTimeMapper["25000/1000000"] = "1/40";
-    m_ExposureTimeMapper["29000/1000000"] = "1/34";
-    m_ExposureTimeMapper["32062/1000000"] = "1/31";
     m_ExposureTimeMapper["33000/1000000"] = "1/30";
     m_ExposureTimeMapper["33333/1000000"] = "1/30";
     m_ExposureTimeMapper["39926/1000000"] = "1/25";
     m_ExposureTimeMapper["40000/1000000"] = "1/25";
-    m_ExposureTimeMapper["63151/1000000"] = "1/16";
-    m_ExposureTimeMapper["69951/1000000"] = "1/14";
-    m_ExposureTimeMapper["84857/1000000"] = "1/12";
-    m_ExposureTimeMapper["90000/1000000"] = "1/11";
 
     m_ExposureTimeMapper["100000/1000000"] = "1/10";
 
@@ -2930,11 +2884,8 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["16666667/1000000000"] = "1/60";
     m_ExposureTimeMapper["134217728/536870912"] = "1/4";
 
-    m_ExposureTimeMapper["6604300/1000000000"] = "1/151";
-    m_ExposureTimeMapper["7845866/1000000000"] = "1/127";
     m_ExposureTimeMapper["8315366/1000000000"] = "1/120";
     m_ExposureTimeMapper["8333333/1000000000"] = "1/120";
-    m_ExposureTimeMapper["29997000/1000000000"] = "1/33";
     m_ExposureTimeMapper["40004000/1000000000"] = "1/25";
 
     m_ExposureTimeMapper["3435973/4294967295"] = "1/1250";
@@ -3079,16 +3030,6 @@ void ExifInfo::RegisterData()
                     m_NewMapperValues["LensModel"] += model;
                 }
             }
-            if (key == "Photo.ExposureTime")
-            {
-                // Exposure times of the format "1/n" are handled separately
-                if (!value.startsWith("1/") &&
-                    !m_ExposureTimeMapper.contains(value))
-                {
-                    m_NewMapperValues["ExposureTime"] += value;
-                }
-            }
-
         }
     }
 
