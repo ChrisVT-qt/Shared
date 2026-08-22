@@ -49,9 +49,17 @@ public:
         QDomElement mParentElement, const QString mcTagName,
         const QString mcAttribute = "", const QString mcAttributeValue = "");
 
-    // Get all child elements
+    // Get all child elements with a certain name
     static QList < QDomElement > GetChildElementsByName(
         QDomElement mParentElement, const QString & mcrTagName);
+
+    // Get all child elements
+    static QList < QDomElement > GetAllChildElements(
+        QDomElement mParentElement);
+
+    // Apply a function to all elements in a DOM
+    static void ApplyToAllElements(QDomElement & mrRootElement,
+        const std::function<void(QDomElement &)> & mrVisitorFunction);
 
     // Convert the contents of a tag to HTML
     static QString ConvertToHTML(const QDomElement mcElement,

@@ -271,6 +271,69 @@ QList < QDomElement > XMLHelper::GetChildElementsByName(
 }
 
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Get all child elements
+QList < QDomElement > XMLHelper::GetAllChildElements(
+    QDomElement mParentElement)
+{
+    CALL_IN(QString("mParentElement=%1")
+        .arg(CALL_SHOW(mParentElement)));
+
+    QList < QDomElement > child_elements;
+    for (QDomNode child_node = mParentElement.firstChild();
+         !child_node.isNull();
+         child_node = child_node.nextSibling())
+    {
+        if (child_node.isElement())
+        {
+            child_elements << child_node.toElement();
+        }
+    }
+
+    CALL_OUT("");
+    return child_elements;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+void XMLHelper::ApplyToAllElements(QDomElement & mrRootElement,
+    const std::function<void(QDomElement &)> & mrVisitorFunction)
+{
+    CALL_IN(QString("mrRootElement=%1m mpFunction=%2")
+        .arg(CALL_SHOW(mrRootElement),
+             "..."));
+
+    // Check if we have a root element
+    if (mrRootElement.isNull())
+    {
+        const QString reason = tr("No root element provided!");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return;
+    }
+
+    // Call method with this element
+    mrVisitorFunction(mrRootElement);
+
+    // Branch into child elements
+    for (QDomNode child_node = mrRootElement.firstChild();
+         !child_node.isNull();
+         child_node = child_node.nextSibling())
+    {
+        if (child_node.isElement())
+        {
+            QDomElement child_element = child_node.toElement();
+            ApplyToAllElements(child_element, mrVisitorFunction);
+        }
+    }
+
+    CALL_OUT("");
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Convert the contents of a tag to HTML
 QString XMLHelper::ConvertToHTML(const QDomElement mcElement,
