@@ -1902,6 +1902,9 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Apple.iPhone SE (2nd generation)"] = "iPhone SE 2";
     m_CameraModelMapper["Apple.iPhone SE (3rd generation)"] = "iPhone SE 3";
 
+    // AT&T
+    m_CameraModelMapper[".AT&T Verge 2 5G"] = "AT&T Verge 2 5G";
+
     // Canon
     m_CameraModelMapper["Canon.CanoScan 5600F"] = "CanoScan 5600F";
     m_CameraModelMapper["Canon.CanoScan LiDE 25"] = "CanoScan LiDE 25";
@@ -2345,6 +2348,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Olympus.C5050Z"] = "Camedia C5050 Zoom";
     m_CameraModelMapper["Olympus.D555Z,C315Z"] =
         "Camedia D555 Zoom, C315 Zoom";
+    m_CameraModelMapper["Olympus.E100RS"] = "E100RS";
     m_CameraModelMapper["Olympus.E-300"] = "Evolt E-300";
     m_CameraModelMapper["Olympus.E-M1"] = "Evolt E-M1";
     m_CameraModelMapper["Olympus.E-M5"] = "Evolt E-M5";
@@ -2452,7 +2456,10 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.SM-G928F"] =
         "Galaxy S6 Edge+ (Factory Unlocked)";
     m_CameraModelMapper["Samsung.SM-G930V"] = "Galaxy S7 SM-G930V (Verizon)";
+    m_CameraModelMapper["Samsung.SM-G955U1"] = "Galaxy S8+ SM-G955U1";
     m_CameraModelMapper["Samsung.SM-G965U"] = "Galaxy S9+ SM-G965U (Unlocked)";
+    m_CameraModelMapper["Samsung.SM-G975F"] =
+        "Galaxy S10+ SM-G975F (Factory Unlocked)";
     m_CameraModelMapper["Samsung.SM-G996U"] = "Galaxy S21+ 5G SM-G996U";
     m_CameraModelMapper["Samsung.SM-J500FN"] = "Galaxy J5 SM-J500FN";
     m_CameraModelMapper["Samsung.SM-J500M"] = "Galaxy J5 SM-J500M";
@@ -2873,7 +2880,11 @@ void ExifInfo::Init_ExposureTimeMapper()
     m_ExposureTimeMapper["33333/1000000"] = "1/30";
     m_ExposureTimeMapper["39926/1000000"] = "1/25";
     m_ExposureTimeMapper["40000/1000000"] = "1/25";
-
+    m_ExposureTimeMapper["40008/1000000"] = "1/25";
+    m_ExposureTimeMapper["63151/1000000"] = "1/16";
+    m_ExposureTimeMapper["69951/1000000"] = "1/14";
+    m_ExposureTimeMapper["84857/1000000"] = "1/12";
+    m_ExposureTimeMapper["90000/1000000"] = "1/11";
     m_ExposureTimeMapper["100000/1000000"] = "1/10";
 
     m_ExposureTimeMapper["1666667/100000000"] = "1/60";
