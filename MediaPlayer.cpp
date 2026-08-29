@@ -140,7 +140,7 @@ void MediaPlayer::InitGUI()
     connect (m_Video, &VideoWidget::StartDrag,
         this, &MediaPlayer::StartDragFrame);
     m_Media -> setVideoOutput(m_Video);
-    top_layout -> addWidget(m_Video);
+    top_layout -> addWidget(m_Video, Qt::AlignCenter);
     connect(m_Media, &QMediaPlayer::positionChanged,
         this, &MediaPlayer::PositionChanged);
 
@@ -1163,6 +1163,8 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     {
         max_time = m_PlayList_DurationMS[mcIndex];
     }
+    const int orig_width = m_PlayList_OriginalWidth[mcIndex];
+    const int orig_height = m_PlayList_OriginalHeight[mcIndex];
     const QPixmap & cover_art = m_PlayList_CoverArt[mcIndex];
 
     // Wait until source has been read; setSource() returns immediately
@@ -1205,6 +1207,7 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     {
         m_CoverArt -> hide();
         m_Video -> show();
+        m_Video -> setMaximumSize(orig_width, orig_height);
     } else if (m_Media -> hasAudio())
     {
         m_Video -> hide();

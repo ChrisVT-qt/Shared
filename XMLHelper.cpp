@@ -298,6 +298,30 @@ QList < QDomElement > XMLHelper::GetAllChildElements(
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Full tag hierarchy (root to element)
+QStringList XMLHelper::GetTagHierarchy(QDomElement & mrDOMElement)
+{
+    CALL_IN(QString("mrDOMElement=%1")
+        .arg(CALL_SHOW(mrDOMElement)));
+
+    QStringList bottom_up;
+    QDomElement dom_tmp = mrDOMElement;
+    while (!dom_tmp.isNull())
+    {
+        bottom_up << dom_tmp.tagName();
+        dom_tmp = dom_tmp.parentNode().toElement();
+    }
+
+    // Reverse order
+    QStringList top_down(bottom_up.rbegin(), bottom_up.rend());
+
+    CALL_OUT("");
+    return top_down;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 void XMLHelper::ApplyToAllElements(QDomElement & mrRootElement,
     const std::function<void(QDomElement &)> & mrVisitorFunction)
 {
@@ -1137,7 +1161,7 @@ QSet < QString > XMLHelper::GetKnownHTMLTags()
 {
     CALL_IN("");
 
-    const QSet < QString > known_tags({
+    static const QSet < QString > known_tags({
         "a",
         "b",
         "br",

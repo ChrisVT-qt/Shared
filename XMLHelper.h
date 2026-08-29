@@ -57,6 +57,9 @@ public:
     static QList < QDomElement > GetAllChildElements(
         QDomElement mParentElement);
 
+    // Full tag hierarchy (root to element)
+    static QStringList GetTagHierarchy(QDomElement & mrDOMElement);
+
     // Apply a function to all elements in a DOM
     static void ApplyToAllElements(QDomElement & mrRootElement,
         const std::function<void(QDomElement &)> & mrVisitorFunction);
