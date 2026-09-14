@@ -298,6 +298,22 @@ QList < QDomElement > XMLHelper::GetAllChildElements(
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Check if tag has any child elements
+bool XMLHelper::HasChildElements(const QDomElement mcParentElement)
+{
+    CALL_IN(QString("mcParentElement=%1")
+        .arg(CALL_SHOW(mcParentElement)));
+
+    const bool has_child_elements =
+        !mcParentElement.firstChildElement().isNull();
+
+    CALL_OUT("");
+    return has_child_elements;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Full tag hierarchy (root to element)
 QStringList XMLHelper::GetTagHierarchy(QDomElement & mrDOMElement)
 {

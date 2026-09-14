@@ -57,6 +57,9 @@ public:
     static QList < QDomElement > GetAllChildElements(
         QDomElement mParentElement);
 
+    // Check if tag has any child elements
+    static bool HasChildElements(const QDomElement mcParentElement);
+
     // Full tag hierarchy (root to element)
     static QStringList GetTagHierarchy(QDomElement & mrDOMElement);
 
