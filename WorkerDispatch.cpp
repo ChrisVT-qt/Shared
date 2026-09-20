@@ -24,11 +24,11 @@ WorkerDispatch::WorkerDispatch()
     CALL_IN("");
     REGISTER_INSTANCE;
 
-    // Not running, not stopping
-    m_NumberOfConcurrentThreads = QThread::idealThreadCount();
+    // Configure thread pool
+    m_ThreadPool.setMaxThreadCount(QThread::idealThreadCount());
 
-    // Queue empty signal hasn't been sent yet
-    m_AllWorkersFinishedSignalSent = false;
+    // Initially not running
+    m_IsRunning = false;
 
     CALL_OUT("");
 }
@@ -65,7 +65,11 @@ WorkerDispatch::~WorkerDispatch()
     CALL_IN("");
     UNREGISTER_INSTANCE;
 
-    // Nothing to do
+    // Delete pending workers
+    for (AbstractWorker * worker : m_PendingWorkers)
+    {
+        delete worker;
+    }
 
     CALL_OUT("");
 }
@@ -83,7 +87,7 @@ int WorkerDispatch::GetNumberOfConcurrentThreads() const
     CALL_IN("");
 
     CALL_OUT("");
-    return m_NumberOfConcurrentThreads;
+    return m_ThreadPool.maxThreadCount();
 }
 
 
@@ -104,7 +108,7 @@ void WorkerDispatch::SetNumberOfConcurrentThreads(const int mcNumber)
         return;
     }
 
-    m_NumberOfConcurrentThreads = mcNumber;
+    m_ThreadPool.setMaxThreadCount(mcNumber);
 
     CALL_OUT("");
 }
@@ -118,7 +122,36 @@ void WorkerDispatch::Start()
     CALL_IN("");
 
     m_IsRunning = true;
-    StartNextWorker();
+    for (AbstractWorker * worker : std::as_const(m_PendingWorkers))
+    {
+        SubmitWorker(worker);
+    }
+    m_PendingWorkers.clear();
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Start work and return only when it's finished
+void WorkerDispatch::Start_WaitForFinish()
+{
+    CALL_IN("");
+
+    // Catch the case if there's nothing to do at all
+    if (m_PendingWorkers.isEmpty() &&
+        m_SubmittedWorkers.isEmpty())
+    {
+        CALL_OUT("");
+        return;
+    }
+
+    QEventLoop loop;
+    connect (this, &WorkerDispatch::AllFinished,
+        &loop, &QEventLoop::quit);
+    Start();
+    loop.exec();
 
     CALL_OUT("");
 }
@@ -135,60 +168,6 @@ void WorkerDispatch::Stop()
     // but it will prevent any new ones starting their work.
     // If you want to stop all work, call Terminate(GetActiveWorkerIDs()).
     m_IsRunning = false;
-
-    CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-void WorkerDispatch::StartNextWorker()
-{
-    CALL_IN("");
-
-    // Check if we're actually running
-    if (!m_IsRunning)
-    {
-        // Nope.
-        CALL_OUT("");
-        return;
-    }
-
-    // Check if we should kick off more work
-    const int active_workers = m_ActiveWorkers.size();
-    if (active_workers >= m_NumberOfConcurrentThreads)
-    {
-        // Nope.
-        CALL_OUT("");
-        return;
-    }
-
-    // Check if there is more work to do
-    if (m_Queue.isEmpty())
-    {
-        // No.
-        CALL_OUT("");
-        return;
-    }
-
-    // Kick off one more worker
-    AbstractWorker * worker = m_Queue.takeFirst();
-    const int worker_id = worker -> GetWorkerID();
-    m_ActiveWorkers[worker_id] = worker;
-    QThread * thread = new QThread();
-    m_WorkerIDToThread[worker_id] = thread;
-    connect (thread, &QThread::started,
-        worker, &AbstractWorker::StartWork);
-    connect (worker, &AbstractWorker::Finished,
-        this, [=]()
-        {
-            WorkerFinished(worker_id);
-        });
-    worker -> moveToThread(thread);
-    thread -> start();
-
-    // Potentially start another thread
-    StartNextWorker();
 
     CALL_OUT("");
 }
@@ -213,19 +192,10 @@ bool WorkerDispatch::AddWorker(AbstractWorker * mpWorker)
 
     // Check if worker is already in the queue
     const int worker_id = mpWorker -> GetWorkerID();
-    if (m_Queue.contains(mpWorker))
+    if (m_PendingWorkers.contains(mpWorker) ||
+        m_SubmittedWorkers.contains(worker_id))
     {
-        const QString reason = tr("Worker %1 is already in the queue.")
-            .arg(QString::number(worker_id));
-        MessageLogger::Error(CALL_METHOD, reason);
-        CALL_OUT(reason);
-        return false;
-    }
-
-    // Check if worker is already being worked on
-    if (m_WorkerIDToThread.contains(worker_id))
-    {
-        const QString reason = tr("Worker %1 is already performing work.")
+        const QString reason = tr("Worker %1 is already queued or running.")
             .arg(QString::number(worker_id));
         MessageLogger::Error(CALL_METHOD, reason);
         CALL_OUT(reason);
@@ -242,12 +212,13 @@ bool WorkerDispatch::AddWorker(AbstractWorker * mpWorker)
         return false;
     }
 
-    // Add worker
-    m_Queue << mpWorker;
-    m_AllWorkersFinishedSignalSent = false;
-
-    // Start worker=
-    StartNextWorker();
+    if (m_IsRunning)
+    {
+        SubmitWorker(mpWorker);
+    } else
+    {
+        m_PendingWorkers << mpWorker;
+    }
 
     CALL_OUT("");
     return true;
@@ -262,58 +233,86 @@ bool WorkerDispatch::AddWorkers(const QList < AbstractWorker * > & mcrWorkers)
     CALL_IN(QString("mcrWorkers=%1")
         .arg("..."));
 
+    bool all_valid = true;
+    QString reason_invalid;
     for (AbstractWorker * worker : mcrWorkers)
     {
         // Check if this worker exists
         if (!worker)
         {
-            const QString reason = tr("No worker object provided.");
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return false;
+            reason_invalid = tr("No worker object provided.");
+            all_valid = false;
+            break;
         }
 
         // Check if worker is already in the queue
         const int worker_id = worker -> GetWorkerID();
-        if (m_Queue.contains(worker))
+        if (m_PendingWorkers.contains(worker) ||
+            m_SubmittedWorkers.contains(worker_id))
         {
-            const QString reason = tr("Worker %1 is already in the queue.")
+            reason_invalid = tr("Worker %1 is already queued or running.")
                 .arg(QString::number(worker_id));
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return false;
-        }
-
-        // Check if worker is already being worked on
-        if (m_WorkerIDToThread.contains(worker_id))
-        {
-            const QString reason = tr("Worker %1 is already performing work.")
-                .arg(QString::number(worker_id));
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return false;
+            all_valid = false;
+            break;
         }
 
         // Check if worker is configured
         if (!worker -> IsConfigured())
         {
-            const QString reason = tr("Worker %1 is not yet configured.")
+            reason_invalid = tr("Worker %1 is not yet configured.")
                 .arg(QString::number(worker_id));
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return false;
+            all_valid = false;
+            break;
         }
     }
 
-    // Add worker
-    m_Queue << mcrWorkers;
-    m_AllWorkersFinishedSignalSent = false;
+    // Handle failure
+    if (!all_valid)
+    {
+        MessageLogger::Error(CALL_METHOD, reason_invalid);
+        CALL_OUT(reason_invalid);
+        return false;
+    }
 
-    // Start worker
-    StartNextWorker();
+    // All good, add all workerd
+    if (m_IsRunning)
+    {
+        for (AbstractWorker * worker : mcrWorkers)
+        {
+            SubmitWorker(worker);
+        }
+    } else
+    {
+        for (AbstractWorker * worker : mcrWorkers)
+        {
+            m_PendingWorkers << worker;
+        }
+    }
 
     CALL_OUT("");
     return true;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+void WorkerDispatch::SubmitWorker(AbstractWorker * mpWorker)
+{
+    CALL_IN(QString("mpWorker=%1")
+        .arg(CALL_SHOW(mpWorker)));
+
+    const int worker_id = mpWorker -> GetWorkerID();
+    m_SubmittedWorkers[worker_id] = mpWorker;
+
+    connect (mpWorker, &AbstractWorker::Finished,
+        this, [ = ](const bool success)
+        {
+            WorkerFinished(worker_id, success);
+        });
+
+    m_ThreadPool.start(mpWorker);
+
+    CALL_OUT("");
 }
 
 
@@ -324,8 +323,8 @@ QSet < int > WorkerDispatch::GetActiveWorkerIDs() const
 {
     CALL_IN("");
 
-    const QSet < int > active_ids(m_ActiveWorkers.keyBegin(),
-        m_ActiveWorkers.keyEnd());
+    const QSet < int > active_ids(m_SubmittedWorkers.keyBegin(),
+        m_SubmittedWorkers.keyEnd());
 
     CALL_OUT("");
     return active_ids;
@@ -340,77 +339,73 @@ bool WorkerDispatch::Terminate(const QSet < int > & mcrWorkerIDs)
     CALL_IN(QString("mcrWorkerIDs=%1")
         .arg(CALL_SHOW(mcrWorkerIDs)));
 
-    // First remove workers from the queue
+    bool all_removed_before_starting = true;
+
+    // Workers that haven't even been submitted yet (Start() not called)
     int index = 0;
-    while (index < m_Queue.size())
+    while (index < m_PendingWorkers.size())
     {
-        AbstractWorker * worker = m_Queue[index];
-        const int worker_id = worker -> GetWorkerID();
+        const int worker_id = m_PendingWorkers[index] -> GetWorkerID();
         if (mcrWorkerIDs.contains(worker_id))
         {
-            m_Queue.removeAt(index);
+            delete m_PendingWorkers[index];
+            m_PendingWorkers.removeAt(index);
         } else
         {
             index++;
         }
     }
 
-    // Terminate currently running workers
     for (const int id : mcrWorkerIDs)
     {
-        if (!m_ActiveWorkers.contains(id))
+        if (!m_SubmittedWorkers.contains(id))
         {
             continue;
         }
 
-        // Terminate worker
-        m_ActiveWorkers[id] -> Cancel();
-        m_ActiveWorkers.remove(id);
+        AbstractWorker * worker = m_SubmittedWorkers[id];
 
-        // Delete thread
-        delete m_WorkerIDToThread[id];
-        m_WorkerIDToThread.remove(id);
+        if (m_ThreadPool.tryTake(worker))
+        {
+            // Was still waiting in the pool's internal queue - run() was
+            // never called, safe to drop immediately.
+            disconnect(worker, &AbstractWorker::Finished, this, nullptr);
+            m_SubmittedWorkers.remove(id);
+            delete worker;
+        } else
+        {
+            // Already running (or, racily, already finished) - can only
+            // ask it to stop cooperatively. WorkerFinished() does the
+            // real cleanup once StartWork() actually returns.
+            worker -> Cancel();
+            all_removed_before_starting = false;
+        }
     }
 
     CALL_OUT("");
-    return false;
+    return all_removed_before_starting;
 }
 
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Worker finished
-void WorkerDispatch::WorkerFinished(const int mcWorkerID)
+void WorkerDispatch::WorkerFinished(const int mcWorkerID,
+    const bool mcWasSuccessful)
 {
-    CALL_IN(QString("mcWorkerID=%1")
-        .arg(CALL_SHOW(mcWorkerID)));
+    CALL_IN(QString("mcWorkerID=%1, mcWasSuccessful=%2")
+        .arg(CALL_SHOW(mcWorkerID),
+             CALL_SHOW(mcWasSuccessful)));
 
-    // Lock while processing
-    m_Mutex.lock();
+    m_SubmittedWorkers.remove(mcWorkerID);
 
-    // Move worker to this thread
-    m_WorkerIDToThread[mcWorkerID] -> exit();
+    emit Finished(mcWorkerID, mcWasSuccessful);
 
-    // Worker no longer active
-    m_ActiveWorkers.remove(mcWorkerID);
-
-    // Delete thread
-    m_WorkerIDToThread.remove(mcWorkerID);
-
-    // Lock while processing
-    m_Mutex.unlock();
-
-    // We don't have ownership of the worker object, so we don't delete it.
-    emit Finished(mcWorkerID);
-
-    if (m_Queue.isEmpty() &&
-        m_ActiveWorkers.isEmpty())
+    if (m_PendingWorkers.isEmpty() &&
+        m_SubmittedWorkers.isEmpty())
     {
         emit AllFinished();
     }
-
-    // Start next worker in queue
-    StartNextWorker();
 
     CALL_OUT("");
 }

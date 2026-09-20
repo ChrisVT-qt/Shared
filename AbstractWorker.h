@@ -4,13 +4,16 @@
 #pragma once
 
 // Qt includes
+#include <QAtomicInteger>
 #include <QObject>
+#include <QRunnable>
 
 
 
 // Class definition
 class AbstractWorker
     : public QObject
+    , public QRunnable
 {
     Q_OBJECT
 
@@ -32,7 +35,7 @@ public:
     // Worker ID
     int GetWorkerID() const;
 protected:
-    static int m_NextWorkerID;
+    static QAtomicInteger < int > m_NextWorkerID;
     int m_WorkerID;
 
 public:
@@ -43,20 +46,20 @@ protected:
     bool m_IsConfigured;
 
 public:
-    // Start work
-    virtual bool StartWork() = 0;
-
-    // Check if worker is idle
-    bool IsIdle() const;
-protected:
-    bool m_IsIdle;
-
-public:
     // Cancel work
     void Cancel();
 protected:
-    bool m_IsCanceled;
+    QAtomicInteger < bool > m_IsCanceled;
+
+private:
+    // Start work
+    void run() override;
+
+protected:
+    // Actual work
+    virtual bool DoWork() = 0;
+
 
 signals:
-    void Finished();
+    void Finished(const bool mcSuccess);
 };

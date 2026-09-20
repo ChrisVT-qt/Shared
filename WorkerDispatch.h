@@ -7,8 +7,10 @@
 
 // Qt includes
 #include <QHash>
-#include <QMutex>
+#include <QList>
 #include <QObject>
+#include <QSet>
+#include <QThreadPool>
 
 // Forward declaration
 class AbstractWorker;
@@ -44,42 +46,46 @@ public:
     // Number of concurrent threads
     int GetNumberOfConcurrentThreads() const;
     void SetNumberOfConcurrentThreads(const int mcNumber);
-private:
-    int m_NumberOfConcurrentThreads;
 
-public:
     // Start/stop work
     void Start();
+    void Start_WaitForFinish();
     void Stop();
 private:
-    void StartNextWorker();
     bool m_IsRunning;
 
 public:
     // Add task to queue
+    // (connect signals for each worker before calling AddWorker() or
+    // AddWorkers() to avoid a race condition)
     bool AddWorker(AbstractWorker * mpWorker);
     bool AddWorkers(const QList < AbstractWorker * > & mcrWorker);
 
     // Active workers
     QSet < int > GetActiveWorkerIDs() const;
 
-    // Remove workers
+    // Returns true iff every requested worker was removed before it ever
+    // started running. Workers already running are asked (cooperatively)
+    // to cancel, but keep running until they notice.
     bool Terminate(const QSet < int > & mcrWorkerIDs);
 
 private:
-    QMutex m_Mutex;
-    QList < AbstractWorker * > m_Queue;
-    QHash < int, AbstractWorker * > m_ActiveWorkers;
-    QHash < int, QThread * > m_WorkerIDToThread;
+    // Submit worker to thread pool
+    void SubmitWorker(AbstractWorker * mpWorker);
 
-private slots:
-    // Worker finished
-    void WorkerFinished(const int mcWorkerID);
+    // Thread pool
+    QThreadPool m_ThreadPool;
 
-private:
-    bool m_AllWorkersFinishedSignalSent;
+    // Workers that haven't been started yet
+    QList < AbstractWorker * > m_PendingWorkers;
+
+    // Workers doing work
+    QHash < int, AbstractWorker * > m_SubmittedWorkers;
+
+    // Worker finished (completed or aborted)
+    void WorkerFinished(const int mcWorkerID, const bool mcWasSuccessful);
 
 signals:
-    void Finished(const int mcWorkerID);
+    void Finished(const int mcWorkerID, const bool mcWasSuccessful);
     void AllFinished();
 };
