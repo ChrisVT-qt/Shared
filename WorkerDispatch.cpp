@@ -66,9 +66,33 @@ WorkerDispatch::~WorkerDispatch()
     UNREGISTER_INSTANCE;
 
     // Delete pending workers
-    for (AbstractWorker * worker : m_PendingWorkers)
+    for (AbstractWorker * worker : std::as_const(m_PendingWorkers))
     {
         delete worker;
+    }
+
+    //... workers in flight
+    for (auto id_iterator = m_SubmittedWorkers.keyBegin();
+         id_iterator != m_SubmittedWorkers.keyEnd();
+         id_iterator++)
+    {
+        const int id = *id_iterator;
+        AbstractWorker * worker = m_SubmittedWorkers[id];
+        disconnect(worker, &AbstractWorker::Finished, this, nullptr);
+
+        if (m_ThreadPool.tryTake(worker))
+        {
+            // Was still waiting in the pool's internal queue - run() was
+            // never called, safe to drop immediately.
+            delete worker;
+        } else
+        {
+            // Already running (or, racily, already finished) - can only
+            // ask it to stop cooperatively. WorkerFinished() does the
+            // real cleanup once StartWork() actually returns.
+            worker -> setAutoDelete(true);
+            worker -> Cancel();
+        }
     }
 
     CALL_OUT("");
@@ -397,6 +421,7 @@ void WorkerDispatch::WorkerFinished(const int mcWorkerID,
         .arg(CALL_SHOW(mcWorkerID),
              CALL_SHOW(mcWasSuccessful)));
 
+    delete m_SubmittedWorkers[mcWorkerID];
     m_SubmittedWorkers.remove(mcWorkerID);
 
     emit Finished(mcWorkerID, mcWasSuccessful);

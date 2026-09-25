@@ -35,7 +35,7 @@ public:
 private:
     static WorkerDispatch * m_Instance;
 
-public:
+protected:
     // Destructor
     ~WorkerDispatch();
 

@@ -47,7 +47,7 @@ AbstractWorker::AbstractWorker()
                  now);
     }
 
-    setAutoDelete(true);
+    setAutoDelete(false);
 }
 
 
