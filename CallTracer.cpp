@@ -641,6 +641,15 @@ QString CallTracer::Show(const long double mcValue)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Show unsigned long long
+QString CallTracer::Show(const unsigned long long mcValue)
+{
+    return StringHelper::ToString(mcValue);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Show QByteArray
 QString CallTracer::Show(const QByteArray & mcrValue)
 {

@@ -330,7 +330,13 @@ public:
       */
     static QString Show(const long double mcValue);
 
-    /** \brief Show QByteArray value in human readable form.
+    /** \brief Show long long value in human readable form.
+      * \param mcValue The value to show
+      * \returns a QString with a human readable representation of the value
+      */
+    static QString Show(const unsigned long long mcValue);
+
+   /** \brief Show QByteArray value in human readable form.
       * \param mcValue The value to show
       * \returns a QString with a human readable representation of the value
       */
