@@ -541,11 +541,6 @@ QPixmap MediaHelper::GetCoverArt(const QString & mcrFilename)
         img_cover_art =
             media_metadata.value(QMediaMetaData::CoverArtImage)
                 .value<QImage>();
-    } else if (meta_keys.contains(QMediaMetaData::ThumbnailImage))
-    {
-        img_cover_art =
-            media_metadata.value(QMediaMetaData::ThumbnailImage)
-                .value<QImage>();
     } else
     {
         CALL_OUT("");
