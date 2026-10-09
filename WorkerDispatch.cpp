@@ -183,6 +183,20 @@ void WorkerDispatch::Start_WaitForFinish()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Wait until all workers are done
+void WorkerDispatch::WaitUntilFinished()
+{
+    CALL_IN("");
+
+    // !!! May never terminate
+    m_ThreadPool.waitForDone();
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Stop work
 void WorkerDispatch::Stop()
 {

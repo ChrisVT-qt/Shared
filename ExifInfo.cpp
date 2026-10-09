@@ -2291,6 +2291,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Nikon.NIKON D5100"] = "D5100";
     m_CameraModelMapper["Nikon.NIKON D5200"] = "D5200";
     m_CameraModelMapper["Nikon.NIKON D5500"] = "D5500";
+    m_CameraModelMapper["Nikon.NIKON D5600"] = "D5600";
     m_CameraModelMapper["Nikon.NIKON D7000"] = "D7000";
     m_CameraModelMapper["Nikon.NIKON D7100"] = "D7100";
     m_CameraModelMapper["Nikon.E880"] = "Coolpix 880";

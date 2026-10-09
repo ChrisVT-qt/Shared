@@ -51,6 +51,7 @@ public:
     void Start();
     void Start_WaitForFinish();
     void Stop();
+    void WaitUntilFinished();
 private:
     bool m_IsRunning;
 
