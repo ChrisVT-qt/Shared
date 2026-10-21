@@ -6,6 +6,7 @@
 
 // Qt includes
 #include <QAudioOutput>
+#include <QBuffer>
 #include <QButtonGroup>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -48,6 +49,7 @@ private:
 protected:
     // Widgets
     QMediaPlayer * m_Media;
+    QBuffer * m_MediaBuffer;
     VideoWidget * m_Video;
     QAudioOutput * m_Audio;
     QMediaDevices * m_MediaDevices;
@@ -84,8 +86,8 @@ private slots:
     void SetVolume(const int mcVolume);
     void TogglePlayPause();
     void PositionChanged(const qint64 mcNewPosition);
-    void PreviousFile();
-    void NextFile();
+    void PreviousIndex();
+    void NextIndex();
 
 protected:
     virtual void closeEvent(QCloseEvent * mpEvent);
@@ -126,15 +128,22 @@ protected:
 
 public:
     // Add media to playlist
-    int AddMediaToPlayList(const QString & mcrLocalFilename,
+    int AddMediaFileToPlayList(const QString & mcrLocalFilename,
         const QString & mcrTitle, const qint64 mcMinTimeMS = 0,
         const qint64 mcMaxTimeMS = -1,
         const QPixmap & mcrCoverArt = QPixmap());
-    bool UpdateInformation(const int mcIndex, const QString & mcrLocalFilename,
+    int AddMediaObjectToPlayList(QByteArray & mrMediaObject,
         const QString & mcrTitle, const qint64 mcMinTimeMS = 0,
         const qint64 mcMaxTimeMS = -1,
         const QPixmap & mcrCoverArt = QPixmap());
+    bool UpdateInformation(const int mcIndex, const QString & mcrTitle,
+        const qint64 mcMinTimeMS = 0, const qint64 mcMaxTimeMS = -1,
+        const QPixmap & mcrCoverArt = QPixmap());
+protected:
+    QMediaMetaData GetMediaMetadata_File(const QString & mcrLocalFilename);
+    QMediaMetaData GetMediaMetadata_Object(QByteArray & mrMediaObject);
 
+public:
     // Number of indices
     int GetPlayListCount() const;
 
@@ -153,6 +162,7 @@ protected:
 protected:
     QList < int > m_PlayList_Indices;
     QHash < int, QString > m_PlayList_Filename;
+    QHash < int, QByteArray > m_PlayList_Object;
     QHash < int, QString > m_PlayList_Title;
     QHash < int, int > m_PlayList_OriginalWidth;
     QHash < int, int > m_PlayList_OriginalHeight;
@@ -205,6 +215,12 @@ public slots:
 
     // PlayMediaFromFile media file
     int PlayMediaFromFile(const QString & mcrLocalFilename,
+        const QString & mcrTitle, const qint64 mcMinTimeMS = 0,
+        const qint64 mcMaxTimeMS = -1,
+        const QPixmap & mcrCoverArt = QPixmap());
+
+    // PlayMediaFromFile media object
+    int PlayMediaFromObject(QByteArray & mcrMediaObject,
         const QString & mcrTitle, const qint64 mcMinTimeMS = 0,
         const qint64 mcMaxTimeMS = -1,
         const QPixmap & mcrCoverArt = QPixmap());

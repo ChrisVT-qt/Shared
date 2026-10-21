@@ -12,7 +12,6 @@
 #include "VideoWidget.h"
 
 // Qt includes
-#include <QBuffer>
 #include <QClipboard>
 #include <QDebug>
 #include <QDir>
@@ -134,6 +133,7 @@ void MediaPlayer::InitGUI()
 
     // Media
     m_Media = new QMediaPlayer(this);
+    m_MediaBuffer = new QBuffer();
     m_Video = new VideoWidget(this);
     connect (m_Video, &VideoWidget::MouseButtonPressed,
         this, &MediaPlayer::TogglePlayPause);
@@ -177,7 +177,7 @@ void MediaPlayer::InitGUI()
     m_PreviousButton -> setIcon(
         style() -> standardIcon(QStyle::SP_MediaSkipBackward));
     connect(m_PreviousButton, &QAbstractButton::clicked,
-        this, &MediaPlayer::PreviousFile);
+        this, &MediaPlayer::PreviousIndex);
     controls_layout -> addWidget(m_PreviousButton);
 
     m_PlayPauseButton = new QToolButton(this);
@@ -191,7 +191,7 @@ void MediaPlayer::InitGUI()
     m_NextButton -> setIcon(
         style() -> standardIcon(QStyle::SP_MediaSkipForward));
     connect(m_NextButton, &QAbstractButton::clicked,
-        this, &MediaPlayer::NextFile);
+        this, &MediaPlayer::NextIndex);
     controls_layout -> addWidget(m_NextButton);
 
     m_CurrentTime = new QLabel(this);
@@ -537,7 +537,7 @@ void MediaPlayer::PositionChanged(const qint64 mcNewPosition)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void MediaPlayer::PreviousFile()
+void MediaPlayer::PreviousIndex()
 {
     CALL_IN("");
 
@@ -557,7 +557,7 @@ void MediaPlayer::PreviousFile()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void MediaPlayer::NextFile()
+void MediaPlayer::NextIndex()
 {
     CALL_IN("");
 
@@ -760,7 +760,7 @@ void MediaPlayer::ReplayPositionChanged(const qint64 mcNewPosition)
                         Pause();
                     } else
                     {
-                        NextFile();
+                        NextIndex();
                     }
                     break;
 
@@ -774,7 +774,7 @@ void MediaPlayer::ReplayPositionChanged(const qint64 mcNewPosition)
                         PlayPlayListIndex(m_PlayList_Indices.first());
                     } else
                     {
-                        NextFile();
+                        NextIndex();
                     }
                     break;
 
@@ -837,6 +837,7 @@ void MediaPlayer::ClearPlayList()
     {
         m_PlayList_Indices.clear();
         m_PlayList_Filename.clear();
+        m_PlayList_Object.clear();
         m_PlayList_Title.clear();
         m_PlayList_MinTimeMS.clear();
         m_PlayList_MaxTimeMS.clear();
@@ -862,8 +863,8 @@ int MediaPlayer::GetCurrentIndex() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Add media to playlist (doesn't start playing it)
-int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
+// Add media file to playlist (doesn't start playing it)
+int MediaPlayer::AddMediaFileToPlayList(const QString & mcrLocalFilename,
     const QString & mcrTitle, const qint64 mcMinTimeMS,
     const qint64 mcMaxTimeMS, const QPixmap & mcrCoverArt)
 {
@@ -882,7 +883,8 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
     {
         const int index = *index_iterator;
 
-        if (m_PlayList_Filename[index] == mcrLocalFilename &&
+        if (m_PlayList_Filename.contains(index) &&
+            m_PlayList_Filename[index] == mcrLocalFilename &&
             mcMinTimeMS == m_PlayList_MinTimeMS[index] &&
             mcMaxTimeMS == m_PlayList_MaxTimeMS[index])
         {
@@ -891,29 +893,8 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
         }
     }
 
-    // Wait until source has been read; setSource() returns immediately
-    // and does not wait for the media file to be loaded.
-    QEventLoop event_loop;
-    QMediaPlayer * media = new QMediaPlayer();
-    connect (media, &QMediaPlayer::mediaStatusChanged,
-        &event_loop, &QEventLoop::quit);
-    media -> setSource(QUrl::fromLocalFile(mcrLocalFilename));
-    event_loop.exec();
-
-    if (media -> error() != QMediaPlayer::NoError)
-    {
-        const QString error_text = media -> errorString();
-        const QString reason = tr("An error occurred while opening media file "
-            "\"%1\": %2")
-            .arg(mcrLocalFilename,
-                error_text);
-        MessageLogger::Error(CALL_METHOD, reason);
-        CALL_OUT(reason);
-        return -1;
-    }
-
     // Available keys
-    const QMediaMetaData meta_data = media -> metaData();
+    const QMediaMetaData meta_data = GetMediaMetadata_File(mcrLocalFilename);
     QList < QMediaMetaData::Key > meta_keys = meta_data.keys();
 
     // Duration
@@ -986,16 +967,119 @@ int MediaPlayer::AddMediaToPlayList(const QString & mcrLocalFilename,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Add media to playlist (doesn't start playing it)
+int MediaPlayer::AddMediaObjectToPlayList(QByteArray & mrMediaObject,
+    const QString & mcrTitle, const qint64 mcMinTimeMS,
+    const qint64 mcMaxTimeMS, const QPixmap & mcrCoverArt)
+{
+    CALL_IN(QString("mrMediaObject=%1, mcrTitle=%2, mcMinTimeMS=%3, "
+            "mcMaxTimeMS=%4, mcrCoverArt=%5")
+        .arg(CALL_SHOW(mrMediaObject),
+             CALL_SHOW(mcrTitle),
+             CALL_SHOW(mcMinTimeMS),
+             CALL_SHOW(mcMaxTimeMS),
+             CALL_SHOW(mcrCoverArt)));
+
+    // Check if we already have this file on the playlist
+    for (auto index_iterator = m_PlayList_Indices.begin();
+         index_iterator != m_PlayList_Indices.end();
+         index_iterator++)
+    {
+        const int index = *index_iterator;
+
+        if (m_PlayList_Object.contains(index) &&
+            m_PlayList_Object[index] == mrMediaObject &&
+            mcMinTimeMS == m_PlayList_MinTimeMS[index] &&
+            mcMaxTimeMS == m_PlayList_MaxTimeMS[index])
+        {
+            CALL_OUT("");
+            return index;
+        }
+    }
+
+    // Get metadara
+    const QMediaMetaData meta_data = GetMediaMetadata_Object(mrMediaObject);
+    QList < QMediaMetaData::Key > meta_keys = meta_data.keys();
+
+    // Duration
+    if (!meta_keys.contains(QMediaMetaData::Duration))
+    {
+        const QString reason =
+            tr("File \"%1\" does not appear to be a video or audio file")
+                .arg(mcrTitle);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return -1;
+    }
+    const qint64 duration_ms =
+        meta_data.value(QMediaMetaData::Duration).toLongLong();
+
+    // Start and end time (ms)
+    if (mcMaxTimeMS != -1 &&
+        mcMinTimeMS > mcMaxTimeMS)
+    {
+        const QString reason =
+            tr("Start time (%1ms) is after end time (%2ms)")
+                .arg(QString::number(mcMinTimeMS),
+                     QString::number(mcMaxTimeMS));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return -1;
+    }
+    if (mcMinTimeMS > duration_ms)
+    {
+        const QString reason =
+            tr("Start time (%1ms) exceeds duration of the media file (%2ms)")
+                .arg(QString::number(mcMinTimeMS),
+                     QString::number(duration_ms));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return -1;
+    }
+
+    // Original width and height
+    int original_width =
+        meta_data.value(QMediaMetaData::Resolution).toSize().width();
+    int original_height =
+        meta_data.value(QMediaMetaData::Resolution).toSize().height();
+    const int orientation =
+        meta_data.value(QMediaMetaData::Orientation).toInt();
+    if (orientation == 90 ||
+        orientation == 270)
+    {
+        qSwap(original_width, original_height);
+    }
+
+    // Add media data
+    const int new_index = m_PlayList_NextIndex++;
+    m_PlayList_Indices << new_index;
+    m_PlayList_Object[new_index] = mrMediaObject;
+    m_PlayList_Title[new_index] = mcrTitle;
+    m_PlayList_OriginalWidth[new_index] = original_width;
+    m_PlayList_OriginalHeight[new_index] = original_height;
+    m_PlayList_MinTimeMS[new_index] = mcMinTimeMS;
+    m_PlayList_MaxTimeMS[new_index] = mcMaxTimeMS;
+    m_PlayList_DurationMS[new_index] = duration_ms;
+    m_PlayList_CoverArt[new_index] = mcrCoverArt;
+
+    Update_PlayList();
+
+    CALL_OUT("");
+    return new_index;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Update media information
 bool MediaPlayer::UpdateInformation(const int mcIndex,
-    const QString & mcrLocalFilename, const QString & mcrTitle,
+    const QString & mcrTitle,
     const qint64 mcMinTimeMS, const qint64 mcMaxTimeMS,
     const QPixmap & mcrCoverArt)
 {
-    CALL_IN(QString("mcIndex=%1, mcrLocalFilename=%2, mcrTitle=%3, "
-        "mcMinTimeMS=%4, mcMaxTimeMS=%5, mcrCoverArt=%6")
+    CALL_IN(QString("mcIndex=%1, mcrTitle=%2, "
+        "mcMinTimeMS=%3, mcMaxTimeMS=%4, mcrCoverArt=%5")
         .arg(CALL_SHOW(mcIndex),
-             CALL_SHOW(mcrLocalFilename),
              CALL_SHOW(mcrTitle),
              CALL_SHOW(mcMinTimeMS),
              CALL_SHOW(mcMaxTimeMS),
@@ -1011,29 +1095,14 @@ bool MediaPlayer::UpdateInformation(const int mcIndex,
         return false;
     }
 
-    // Wait until source has been read; setSource() returns immediately
-    // and does not wait for the media file to be loaded.
-    QEventLoop event_loop;
-    QMediaPlayer * media = new QMediaPlayer();
-    connect (media, &QMediaPlayer::mediaStatusChanged,
-        &event_loop, &QEventLoop::quit);
-    media -> setSource(QUrl::fromLocalFile(mcrLocalFilename));
-    event_loop.exec();
-
-    if (media -> error() != QMediaPlayer::NoError)
+    QMediaMetaData meta_data;
+    if (m_PlayList_Filename.contains(mcIndex))
     {
-        const QString error_text = media -> errorString();
-        const QString reason = tr("An error occurred while opening media file "
-            "\"%1\": %2")
-            .arg(mcrLocalFilename,
-                error_text);
-        MessageLogger::Error(CALL_METHOD, reason);
-        CALL_OUT(reason);
-        return false;
+        meta_data = GetMediaMetadata_File(m_PlayList_Filename[mcIndex]);
+    } else
+    {
+        meta_data = GetMediaMetadata_Object(m_PlayList_Object[mcIndex]);
     }
-
-    // Available keys
-    const QMediaMetaData meta_data = media -> metaData();
     QList < QMediaMetaData::Key > meta_keys = meta_data.keys();
 
     // Duration
@@ -1041,7 +1110,7 @@ bool MediaPlayer::UpdateInformation(const int mcIndex,
     {
         const QString reason =
             tr("File \"%1\" does not appear to be a video or audio file")
-                .arg(mcrLocalFilename);
+                .arg(mcrTitle);
         MessageLogger::Error(CALL_METHOD, reason);
         CALL_OUT(reason);
         return false;
@@ -1073,7 +1142,7 @@ bool MediaPlayer::UpdateInformation(const int mcIndex,
     }
 
     // Add media data
-    m_PlayList_Filename[mcIndex] = mcrLocalFilename;
+    // (local filename or media object won't change)
     m_PlayList_Title[mcIndex] = mcrTitle;
     m_PlayList_MinTimeMS[mcIndex] = mcMinTimeMS;
     m_PlayList_MaxTimeMS[mcIndex] = mcMaxTimeMS;
@@ -1085,6 +1154,89 @@ bool MediaPlayer::UpdateInformation(const int mcIndex,
     CALL_OUT("");
     return true;
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get media metadata
+QMediaMetaData MediaPlayer::GetMediaMetadata_File(const QString & mcrFilename)
+{
+    CALL_IN(QString("mcrFilename=%1")
+        .arg(CALL_SHOW(mcrFilename)));
+
+    // Wait until source has been read; setSource() returns immediately
+    // and does not wait for the media file to be loaded.
+    QEventLoop event_loop;
+    QMediaPlayer * player = new QMediaPlayer();
+    connect (player, &QMediaPlayer::mediaStatusChanged,
+            &event_loop, &QEventLoop::quit);
+    player -> setSource(QUrl::fromLocalFile(mcrFilename));
+    event_loop.exec();
+
+    if (player -> error() != QMediaPlayer::NoError)
+    {
+        const QString error_text = m_Media -> errorString();
+        const QString reason = tr("An error occurred while opening media file "
+            "\"%1\": %2")
+            .arg(mcrFilename,
+                error_text);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QMediaMetaData();
+    }
+
+    // Get metadata
+    const QMediaMetaData metadata = player -> metaData();
+
+    // Clean up
+    delete player;
+
+    CALL_OUT("");
+    return metadata;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Get media metadata
+QMediaMetaData MediaPlayer::GetMediaMetadata_Object(QByteArray & mrObject)
+{
+    CALL_IN(QString("mrObject=%1")
+        .arg(CALL_SHOW(mrObject)));
+
+    // Wait until source has been read; setSource() returns immediately
+    // and does not wait for the media file to be loaded.
+    QEventLoop event_loop;
+    QMediaPlayer * player = new QMediaPlayer();
+    connect (player, &QMediaPlayer::mediaStatusChanged,
+            &event_loop, &QEventLoop::quit);
+    QBuffer * buffer = new QBuffer(&mrObject);
+    buffer -> open(QIODevice::ReadOnly);
+    player -> setSourceDevice(buffer, QUrl::fromLocalFile(""));
+    event_loop.exec();
+
+    if (player -> error() != QMediaPlayer::NoError)
+    {
+        const QString error_text = m_Media -> errorString();
+        const QString reason = tr("An error occurred while opening media "
+            "object: %1")
+            .arg(error_text);
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return QMediaMetaData();
+    }
+
+    // Get metadata
+    const QMediaMetaData metadata = player -> metaData();
+
+    // Clean up
+    delete buffer;
+    delete player;
+
+    CALL_OUT("");
+    return metadata;
+}
+
 
 
 
@@ -1155,7 +1307,6 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     m_Media -> setSource(QString());
 
     // Abbreviations
-    const QString filename = m_PlayList_Filename[mcIndex];
     const QString title = m_PlayList_Title[mcIndex];
     const qint64 min_time = m_PlayList_MinTimeMS[mcIndex];
     qint64 max_time = m_PlayList_MaxTimeMS[mcIndex];
@@ -1172,7 +1323,30 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     QEventLoop event_loop;
     connect (m_Media, &QMediaPlayer::mediaStatusChanged,
             &event_loop, &QEventLoop::quit);
-    m_Media -> setSource(QUrl::fromLocalFile(filename));
+    QString filename;
+    if (m_PlayList_Filename.contains(mcIndex))
+    {
+        // Playing from file
+        filename = m_PlayList_Filename[mcIndex];
+        m_Media -> setSource(QUrl::fromLocalFile(filename));
+    } else if (m_PlayList_Object.contains(mcIndex))
+    {
+        // Playing from object
+        filename = title;
+        delete m_MediaBuffer;
+        m_MediaBuffer = new QBuffer(&m_PlayList_Object[mcIndex], this);
+        m_MediaBuffer -> open(QIODevice::ReadOnly);
+        m_Media -> setSourceDevice(m_MediaBuffer,
+            QUrl::fromLocalFile(filename));
+    } else
+    {
+        // Error
+        const QString reason = tr("Index %1 is neither a file nor an object.")
+            .arg(QString::number(mcIndex));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return false;
+    }
     event_loop.exec();
 
     if (m_Media -> error() != QMediaPlayer::NoError)
@@ -1190,7 +1364,6 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     m_TimeSlider -> setMinimum(min_time);
     m_TimeSlider -> setMaximum(max_time);
     m_MaxTime -> setText(StringHelper::ConvertToTime_ms(max_time*0.001));
-
 
     // Set window title
     setWindowTitle(title);
@@ -1604,7 +1777,45 @@ int MediaPlayer::PlayMediaFromFile(const QString & mcrLocalFilename,
         m_PlayList_CoverArt.clear();
     }
 
-    const int index = AddMediaToPlayList(mcrLocalFilename, mcrTitle,
+    const int index = AddMediaFileToPlayList(mcrLocalFilename, mcrTitle,
+        mcMinTimeMS, mcMaxTimeMS, mcrCoverArt);
+    if (index != -1)
+    {
+        PlayPlayListIndex(index);
+    }
+
+    CALL_OUT("");
+    return index;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// PlayMediaFromFile media object
+int MediaPlayer::PlayMediaFromObject(QByteArray & mrMediaObject,
+    const QString & mcrTitle, const qint64 mcMinTimeMS,
+    const qint64 mcMaxTimeMS, const QPixmap & mcrCoverArt)
+{
+    CALL_IN(QString("mrMediaObject=%1, mcrTitle=%2, mcMinTimeMS=%3, "
+        "mcMaxTimeMS=%4, mcrCoverArt=%5")
+        .arg(CALL_SHOW(mrMediaObject),
+             CALL_SHOW(mcrTitle),
+             CALL_SHOW(mcMinTimeMS),
+             CALL_SHOW(mcMaxTimeMS),
+             CALL_SHOW(mcrCoverArt)));
+
+    if (!m_HasPlayList)
+    {
+        m_PlayList_Indices.clear();
+        m_PlayList_Filename.clear();
+        m_PlayList_Object.clear();
+        m_PlayList_Title.clear();
+        m_PlayList_MinTimeMS.clear();
+        m_PlayList_MaxTimeMS.clear();
+        m_PlayList_CoverArt.clear();
+    }
+
+    const int index = AddMediaObjectToPlayList(mrMediaObject, mcrTitle,
         mcMinTimeMS, mcMaxTimeMS, mcrCoverArt);
     if (index != -1)
     {
