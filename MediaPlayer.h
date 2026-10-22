@@ -101,7 +101,9 @@ private slots:
     void FrameForward();
     void FrameBackward();
     void CopyFrame();
-    void CaptureFinalFrame(const QVideoFrame & mcrFrame);
+    void FrameChanged(const QVideoFrame & mcrFrame);
+    QVideoFrame CaptureFinalFrame(const QVideoFrame & mcrFrame);
+    QVideoFrame FixHDR(const QVideoFrame & mcrFrame);
 
     void ReplayPositionChanged(const qint64 mcNewPosition);
 signals:
@@ -171,6 +173,13 @@ protected:
     QHash < int, qint64 > m_PlayList_DurationMS;
     QHash < int, QPixmap > m_PlayList_CoverArt;
     int m_PlayList_NextIndex;
+
+public:
+    void SetFixHDR(const int mcIndex, const bool mcNewStatus,
+        const double mcMaxLuminance);
+protected:
+    QHash < int, bool > m_PlayList_FixHDR;
+    QHash < int, double > m_PlayList_MaxLuminance;
 
 private slots:
     void Update_PlayList();

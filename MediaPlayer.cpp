@@ -141,12 +141,10 @@ void MediaPlayer::InitGUI()
         this, &MediaPlayer::StartDragFrame);
     m_Media -> setVideoOutput(m_Video);
     top_layout -> addWidget(m_Video, Qt::AlignCenter);
-    connect(m_Media, &QMediaPlayer::positionChanged,
-        this, &MediaPlayer::PositionChanged);
-
-    // Catch frame changes to avoid black final frame at then end of the video
     connect (m_Media -> videoSink(), &QVideoSink::videoFrameChanged,
-        this, &MediaPlayer::CaptureFinalFrame);
+        this, &MediaPlayer::FrameChanged);
+    connect (m_Media, &QMediaPlayer::positionChanged,
+        this, &MediaPlayer::PositionChanged);
     connect (m_Media, &QMediaPlayer::positionChanged,
         this, &MediaPlayer::ReplayPositionChanged);
 
@@ -702,8 +700,25 @@ void MediaPlayer::CopyFrame()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Process current frame
+void MediaPlayer::FrameChanged(const QVideoFrame & mcrFrame)
+{
+    CALL_IN(QString("mcrFrame=%1")
+        .arg("..."));
+
+    QVideoFrame frame = mcrFrame;
+    frame = CaptureFinalFrame(mcrFrame);
+    frame = FixHDR(mcrFrame);
+    m_Media -> videoSink() -> setVideoFrame(frame);
+
+    CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Try and capture final frame
-void MediaPlayer::CaptureFinalFrame(const QVideoFrame & mcrFrame)
+QVideoFrame MediaPlayer::CaptureFinalFrame(const QVideoFrame & mcrFrame)
 {
     CALL_IN(QString("mcrFrame=%1")
         .arg("..."));
@@ -712,12 +727,112 @@ void MediaPlayer::CaptureFinalFrame(const QVideoFrame & mcrFrame)
     if (mcrFrame.isValid())
     {
         previous_frame = mcrFrame;
+        CALL_OUT("");
+        return mcrFrame;
     } else
     {
-        m_Media -> videoSink() -> setVideoFrame(previous_frame);
+        CALL_OUT("");
+        return previous_frame;
     }
 
     CALL_OUT("");
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Fix incorect color space information on some videos
+QVideoFrame MediaPlayer::FixHDR(const QVideoFrame & mcrFrame)
+{
+    // Note this fixes an issue with ffmpeg 9.0.1 (Qt 6.12.0)
+    // Problem can be fixed be reverting back to darwin video handling
+    // instead of ffmpeg:
+    //
+    // Put this in main.cpp before the Qt App gets instanciated:
+    //   qputenv("QT_MEDIA_BACKEND", "darwin");
+    //
+    // We'll lose additional formats being recognized by ffmpeg, though,
+    // so that's not what we'll do, and this is what this method is for.
+
+    CALL_IN(QString("mcrFrame=%1")
+        .arg("..."));
+
+    // Check if we are being asked to fix in the first place
+    if (!m_PlayList_FixHDR[m_PlayList_CurrentIndex])
+    {
+        // No
+        CALL_OUT("");
+        return mcrFrame;
+    }
+
+    // We don't care about invalid frames
+    if (!mcrFrame.isValid())
+    {
+        CALL_OUT("");
+        return mcrFrame;
+    }
+
+    QVideoFrameFormat fmt = mcrFrame.surfaceFormat();
+
+    // Only intervene when the metadata is actually bad.
+    const bool needs_space =
+        (fmt.colorSpace() == QVideoFrameFormat::ColorSpace_Undefined);
+    const bool needs_luminance =
+        (fmt.maxLuminance() > 20000.f); // PQ tops out at 10,000 nits
+    if (!needs_space &&
+        !needs_luminance)
+    {
+        CALL_OUT("");
+        return mcrFrame;
+    }
+
+    // Correct the metadata
+    if (needs_space)
+    {
+        fmt.setColorSpace(QVideoFrameFormat::ColorSpace_BT2020);
+    }
+    if (needs_luminance)
+    {
+        fmt.setMaxLuminance(m_PlayList_MaxLuminance[m_PlayList_CurrentIndex]);
+    }
+
+    QVideoFrame src(mcrFrame);
+    QVideoFrame dst(fmt);
+    if (!src.map(QVideoFrame::ReadOnly))
+    {
+        CALL_OUT("");
+        return mcrFrame;
+    }
+    if (!dst.map(QVideoFrame::WriteOnly))
+    {
+        src.unmap();
+        CALL_OUT("");
+        return mcrFrame;
+    }
+
+    // P010
+    // - plane 0 = Y (full height),
+    // - plane 1 = interleaved CbCr (half height)
+    const int h = fmt.frameHeight();
+    for (int p = 0; p < src.planeCount(); p++)
+    {
+        const int rows = (p == 0) ? h : (h + 1) / 2;
+        const int srcStride = src.bytesPerLine(p);
+        const int dstStride = dst.bytesPerLine(p);
+        const int rowBytes = std::min(srcStride, dstStride);
+        for (int y = 0; y < rows; ++y)
+            std::memcpy(dst.bits(p) + y * dstStride,
+                        src.bits(p) + y * srcStride, rowBytes);
+    }
+
+    dst.unmap();
+    src.unmap();
+
+    dst.setStartTime(mcrFrame.startTime());
+    dst.setEndTime(mcrFrame.endTime());
+
+    CALL_OUT("");
+    return dst;
 }
 
 
@@ -958,6 +1073,9 @@ int MediaPlayer::AddMediaFileToPlayList(const QString & mcrLocalFilename,
     m_PlayList_DurationMS[new_index] = duration_ms;
     m_PlayList_CoverArt[new_index] = mcrCoverArt;
 
+    m_PlayList_FixHDR[new_index] = false;
+    m_PlayList_MaxLuminance[new_index] = -1;
+
     Update_PlayList();
 
     CALL_OUT("");
@@ -1061,6 +1179,9 @@ int MediaPlayer::AddMediaObjectToPlayList(QByteArray & mrMediaObject,
     m_PlayList_MaxTimeMS[new_index] = mcMaxTimeMS;
     m_PlayList_DurationMS[new_index] = duration_ms;
     m_PlayList_CoverArt[new_index] = mcrCoverArt;
+
+    m_PlayList_FixHDR[new_index] = false;
+    m_PlayList_MaxLuminance[new_index] = -1;
 
     Update_PlayList();
 
@@ -1446,6 +1567,32 @@ void MediaPlayer::PlayListContextMenu(const int mcIndex,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Enable HDR fixing (ffmpeg problem)
+void MediaPlayer::SetFixHDR(const int mcIndex, const bool mcNewStatus,
+    const double mcMaxLuminance)
+{
+    CALL_IN(QString("mcIndex=%1, mcNewStatus=%2, mcMaxLuminance=%3")
+        .arg(CALL_SHOW(mcIndex),
+             CALL_SHOW(mcNewStatus),
+             CALL_SHOW(mcMaxLuminance)));
+
+    // Check if index exists
+    if (!m_PlayList_Indices.contains(mcIndex))
+    {
+        const QString reason = tr("Invalid index %1.")
+            .arg(QString::number(mcIndex));
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return;
+    }
+
+    m_PlayList_FixHDR[mcIndex] = mcNewStatus;
+    m_PlayList_MaxLuminance[mcIndex] = mcMaxLuminance;
+
+    CALL_OUT("");
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Update playlist
 void MediaPlayer::Update_PlayList()
 {
@@ -1560,7 +1707,8 @@ void MediaPlayer::Update_PlayList()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Convert repeat mode
-QString MediaPlayer::ToHumanReadable(const MediaPlayer::RepeatMode mcMode) const
+QString MediaPlayer::ToHumanReadable(
+    const MediaPlayer::RepeatMode mcMode) const
 {
     CALL_IN(QString("mcMode=%1")
         .arg("..."));
@@ -1775,6 +1923,8 @@ int MediaPlayer::PlayMediaFromFile(const QString & mcrLocalFilename,
         m_PlayList_MinTimeMS.clear();
         m_PlayList_MaxTimeMS.clear();
         m_PlayList_CoverArt.clear();
+        m_PlayList_FixHDR.clear();
+        m_PlayList_MaxLuminance.clear();
     }
 
     const int index = AddMediaFileToPlayList(mcrLocalFilename, mcrTitle,
@@ -1813,6 +1963,8 @@ int MediaPlayer::PlayMediaFromObject(QByteArray & mrMediaObject,
         m_PlayList_MinTimeMS.clear();
         m_PlayList_MaxTimeMS.clear();
         m_PlayList_CoverArt.clear();
+        m_PlayList_FixHDR.clear();
+        m_PlayList_MaxLuminance.clear();
     }
 
     const int index = AddMediaObjectToPlayList(mrMediaObject, mcrTitle,
