@@ -1396,6 +1396,19 @@ QString CallTracer::Show(const QVector < double > & mcrValue)
 
 
 
+#ifdef QT_MULTIMEDIA_LIB
+///////////////////////////////////////////////////////////////////////////////
+// Show QVector
+QString CallTracer::Show(const QVideoFrame & mcrValue)
+{
+    return QString("{width:%1, height:%2}")
+        .arg(QString::number(mcrValue.width()),
+             QString::number(mcrValue.height()));
+}
+#endif
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Show generic pointer address
 QString CallTracer::Show(const void * mcpValue)

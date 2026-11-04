@@ -62,6 +62,11 @@
 #include <QSqlQuery>
 #endif
 
+// Only relevant if Multimedia module is used
+#ifdef QT_MULTIMEDIA_LIB
+#include <QVideoFrame>
+#endif
+
 // Macros to use
 #include "Deploy.h"
 #if DEPLOY
@@ -593,6 +598,14 @@ public:
       * \returns a QString with a human readable representation of the value
       */
     static QString Show(const QVector < double > & mcrValue);
+
+#ifdef QT_MULTIMEDIA_LIB
+    /** \brief Show QVideoFrame value in human readable form.
+      * \param mcValue The value to show
+      * \returns a QString with a human readable representation of the value
+      */
+    static QString Show(const QVideoFrame & mcrValue);
+#endif
 
     /** \brief Show address of generic pointer in human readable form.
       * \param mcValue The value to show

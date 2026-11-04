@@ -19,7 +19,6 @@
 
 // Forward declaration
 class ClickableWidget;
-class CoverArtWidget;
 class VideoWidget;
 
 
@@ -53,7 +52,6 @@ protected:
     VideoWidget * m_Video;
     QAudioOutput * m_Audio;
     QMediaDevices * m_MediaDevices;
-    CoverArtWidget * m_CoverArt;
 
 private:
     QLabel * m_CurrentTime;
@@ -101,9 +99,6 @@ private slots:
     void FrameForward();
     void FrameBackward();
     void CopyFrame();
-    void FrameChanged(const QVideoFrame & mcrFrame);
-    QVideoFrame CaptureFinalFrame(const QVideoFrame & mcrFrame);
-    QVideoFrame FixHDR(const QVideoFrame & mcrFrame);
 
     void ReplayPositionChanged(const qint64 mcNewPosition);
 signals:
@@ -201,6 +196,7 @@ private:
 
 public:
     enum TitleEndMode {
+        TitleEnd_Invalid,
         TitleEnd_Continue,
         TitleEnd_Stop
     };

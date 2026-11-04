@@ -4,7 +4,6 @@
 // Project includes
 #include "CallTracer.h"
 #include "ClickableWidget.h"
-#include "CoverArtWidget.h"
 #include "MediaPlayer.h"
 #include "MessageLogger.h"
 #include "Preferences.h"
@@ -57,6 +56,9 @@ MediaPlayer::MediaPlayer()
 
     // We do have a playlist per default
     m_HasPlayList = true;
+    m_PlayList_CurrentIndex = -1;
+    m_RepeatMode = Repeat_None;
+    m_TitleEndMode = TitleEnd_Invalid;
 
     // Initialize GUI
     InitGUI();
@@ -128,29 +130,33 @@ void MediaPlayer::InitGUI()
     splitter -> addWidget(top_widget);
 
     // Top layout
-    QVBoxLayout * top_layout = new QVBoxLayout();
+    QGridLayout * top_layout = new QGridLayout();
+    int top_row = 0;
     top_widget -> setLayout(top_layout);
 
     // Media
     m_Media = new QMediaPlayer(this);
-    m_MediaBuffer = new QBuffer();
+    m_MediaBuffer = new QBuffer(this);
+
     m_Video = new VideoWidget(this);
+    top_layout -> addWidget(m_Video);
+    top_layout -> setRowStretch(top_row, 1);
     connect (m_Video, &VideoWidget::MouseButtonPressed,
         this, &MediaPlayer::TogglePlayPause);
     connect (m_Video, &VideoWidget::StartDrag,
         this, &MediaPlayer::StartDragFrame);
-    m_Media -> setVideoOutput(m_Video);
-    top_layout -> addWidget(m_Video, Qt::AlignCenter);
-    connect (m_Media -> videoSink(), &QVideoSink::videoFrameChanged,
-        this, &MediaPlayer::FrameChanged);
+    QVideoSink * video_sink = m_Video -> GetVideoSink();
+    m_Media -> setVideoSink(video_sink);
+
     connect (m_Media, &QMediaPlayer::positionChanged,
         this, &MediaPlayer::PositionChanged);
     connect (m_Media, &QMediaPlayer::positionChanged,
         this, &MediaPlayer::ReplayPositionChanged);
+    top_row++;
 
     // Audio
-    m_Audio = new QAudioOutput();
-    m_MediaDevices = new QMediaDevices();
+    m_Audio = new QAudioOutput(this);
+    m_MediaDevices = new QMediaDevices(this);
     // Always stick with the default system audio output device
     connect (m_MediaDevices, &QMediaDevices::audioOutputsChanged,
             this,
@@ -159,17 +165,13 @@ void MediaPlayer::InitGUI()
     m_Media -> setAudioOutput(m_Audio);
     m_Audio -> setVolume(DEFAULT_VOLUME);
 
-    // Cover art (for audio)
-    m_CoverArt = new CoverArtWidget();
-    connect (m_CoverArt, &CoverArtWidget::ClickOnImage,
-            this, &MediaPlayer::TogglePlayPause);
-    top_layout -> addWidget(m_CoverArt);
-    m_CoverArt -> hide();
-
 
     // == Controls
     QHBoxLayout * controls_layout = new QHBoxLayout();
-    top_layout -> addLayout(controls_layout);
+    top_layout -> addLayout(controls_layout, top_row, 0, 1, 1,
+        Qt::AlignCenter);
+    top_layout -> setRowStretch(top_row, 0);
+    top_row++;
 
     m_PreviousButton = new QToolButton(this);
     m_PreviousButton -> setIcon(
@@ -695,144 +697,6 @@ void MediaPlayer::CopyFrame()
     clipboard -> setPixmap(QPixmap::fromImage(image));
 
     CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Process current frame
-void MediaPlayer::FrameChanged(const QVideoFrame & mcrFrame)
-{
-    CALL_IN(QString("mcrFrame=%1")
-        .arg("..."));
-
-    QVideoFrame frame = mcrFrame;
-    frame = CaptureFinalFrame(mcrFrame);
-    frame = FixHDR(mcrFrame);
-    m_Media -> videoSink() -> setVideoFrame(frame);
-
-    CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Try and capture final frame
-QVideoFrame MediaPlayer::CaptureFinalFrame(const QVideoFrame & mcrFrame)
-{
-    CALL_IN(QString("mcrFrame=%1")
-        .arg("..."));
-
-    static QVideoFrame previous_frame;
-    if (mcrFrame.isValid())
-    {
-        previous_frame = mcrFrame;
-        CALL_OUT("");
-        return mcrFrame;
-    } else
-    {
-        CALL_OUT("");
-        return previous_frame;
-    }
-
-    CALL_OUT("");
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Fix incorect color space information on some videos
-QVideoFrame MediaPlayer::FixHDR(const QVideoFrame & mcrFrame)
-{
-    // Note this fixes an issue with ffmpeg 9.0.1 (Qt 6.12.0)
-    // Problem can be fixed be reverting back to darwin video handling
-    // instead of ffmpeg:
-    //
-    // Put this in main.cpp before the Qt App gets instanciated:
-    //   qputenv("QT_MEDIA_BACKEND", "darwin");
-    //
-    // We'll lose additional formats being recognized by ffmpeg, though,
-    // so that's not what we'll do, and this is what this method is for.
-
-    CALL_IN(QString("mcrFrame=%1")
-        .arg("..."));
-
-    // Check if we are being asked to fix in the first place
-    if (!m_PlayList_FixHDR[m_PlayList_CurrentIndex])
-    {
-        // No
-        CALL_OUT("");
-        return mcrFrame;
-    }
-
-    // We don't care about invalid frames
-    if (!mcrFrame.isValid())
-    {
-        CALL_OUT("");
-        return mcrFrame;
-    }
-
-    QVideoFrameFormat fmt = mcrFrame.surfaceFormat();
-
-    // Only intervene when the metadata is actually bad.
-    const bool needs_space =
-        (fmt.colorSpace() == QVideoFrameFormat::ColorSpace_Undefined);
-    const bool needs_luminance =
-        (fmt.maxLuminance() > 20000.f); // PQ tops out at 10,000 nits
-    if (!needs_space &&
-        !needs_luminance)
-    {
-        CALL_OUT("");
-        return mcrFrame;
-    }
-
-    // Correct the metadata
-    if (needs_space)
-    {
-        fmt.setColorSpace(QVideoFrameFormat::ColorSpace_BT2020);
-    }
-    if (needs_luminance)
-    {
-        fmt.setMaxLuminance(m_PlayList_MaxLuminance[m_PlayList_CurrentIndex]);
-    }
-
-    QVideoFrame src(mcrFrame);
-    QVideoFrame dst(fmt);
-    if (!src.map(QVideoFrame::ReadOnly))
-    {
-        CALL_OUT("");
-        return mcrFrame;
-    }
-    if (!dst.map(QVideoFrame::WriteOnly))
-    {
-        src.unmap();
-        CALL_OUT("");
-        return mcrFrame;
-    }
-
-    // P010
-    // - plane 0 = Y (full height),
-    // - plane 1 = interleaved CbCr (half height)
-    const int h = fmt.frameHeight();
-    for (int p = 0; p < src.planeCount(); p++)
-    {
-        const int rows = (p == 0) ? h : (h + 1) / 2;
-        const int srcStride = src.bytesPerLine(p);
-        const int dstStride = dst.bytesPerLine(p);
-        const int rowBytes = std::min(srcStride, dstStride);
-        for (int y = 0; y < rows; ++y)
-            std::memcpy(dst.bits(p) + y * dstStride,
-                        src.bits(p) + y * srcStride, rowBytes);
-    }
-
-    dst.unmap();
-    src.unmap();
-
-    dst.setStartTime(mcrFrame.startTime());
-    dst.setEndTime(mcrFrame.endTime());
-
-    CALL_OUT("");
-    return dst;
 }
 
 
@@ -1400,9 +1264,7 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
         Pause();
         m_PlayList_CurrentIndex = mcIndex;
         m_Media -> setSource(QString());
-        m_CoverArt -> SetPixmap(QPixmap());
-        m_Video -> hide();
-        m_CoverArt -> show();
+        m_Video -> SetCurrentImage(QImage());
         setWindowTitle(tr("No media file"));
         CALL_OUT("");
         return true;
@@ -1435,15 +1297,27 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     {
         max_time = m_PlayList_DurationMS[mcIndex];
     }
-    const int orig_width = m_PlayList_OriginalWidth[mcIndex];
-    const int orig_height = m_PlayList_OriginalHeight[mcIndex];
-    const QPixmap & cover_art = m_PlayList_CoverArt[mcIndex];
+    // !!! Cover art should be QImage
+    const QImage & cover_art = m_PlayList_CoverArt[mcIndex].toImage();
 
     // Wait until source has been read; setSource() returns immediately
     // and does not wait for the media file to be loaded.
+
+    // !!! The nested event loop also lets the user click things mid-load,
+    // !!! which can re-enter this method. Disabling the controls during
+    // !!! the load, or switching to an async handler, would be safer.
     QEventLoop event_loop;
     connect (m_Media, &QMediaPlayer::mediaStatusChanged,
-            &event_loop, &QEventLoop::quit);
+            &event_loop, [&](QMediaPlayer::MediaStatus s)
+        {
+            if (s == QMediaPlayer::LoadedMedia ||
+                s == QMediaPlayer::InvalidMedia)
+            {
+                event_loop.quit();
+            }
+        });
+
+
     QString filename;
     if (m_PlayList_Filename.contains(mcIndex))
     {
@@ -1468,7 +1342,12 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
         CALL_OUT(reason);
         return false;
     }
-    event_loop.exec();
+    if (m_Media -> mediaStatus() != QMediaPlayer::LoadedMedia &&
+        m_Media -> mediaStatus() != QMediaPlayer::InvalidMedia)
+    {
+        // Read media
+        event_loop.exec();
+    }
 
     if (m_Media -> error() != QMediaPlayer::NoError)
     {
@@ -1499,41 +1378,12 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     // Media type
     if (m_Media -> hasVideo())
     {
-        m_CoverArt -> hide();
-        m_Video -> show();
-        m_Video -> setMaximumSize(orig_width, orig_height);
+        m_Video -> SetCurrentImage(QImage());
+        m_Video -> SetFixHDR(m_PlayList_FixHDR[mcIndex]);
+        m_Video -> SetMaxLuminance(m_PlayList_MaxLuminance[mcIndex]);
     } else if (m_Media -> hasAudio())
     {
-        m_Video -> hide();
-        m_CoverArt -> show();
-    } else
-    {
-        m_Video -> hide();
-        m_CoverArt -> hide();
-    }
-
-    // Sert cover art
-    if (!cover_art.isNull())
-    {
-        // Check if it's an audio file we're playing
-        if (m_Media -> hasVideo())
-        {
-            const QString reason = tr("Cannot set cover art for a video.");
-            MessageLogger::Error(CALL_METHOD, reason);
-            CALL_OUT(reason);
-            return false;
-        }
-
-        // Set cover art
-        m_CoverArt -> SetPixmap(cover_art);
-        m_CoverArt -> update();
-    } else
-    {
-        // Check if it's an audio file we're playing
-        if (!m_Media -> hasVideo())
-        {
-            m_CoverArt -> hide();
-        }
+        m_Video -> SetCurrentImage(cover_art);
     }
 
     // Play media file
@@ -1591,6 +1441,8 @@ void MediaPlayer::SetFixHDR(const int mcIndex, const bool mcNewStatus,
 
     CALL_OUT("");
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Update playlist
@@ -1785,6 +1637,7 @@ QString MediaPlayer::ToHumanReadable(
     static QHash < TitleEndMode, QString > mapper;
     if (mapper.isEmpty())
     {
+        mapper[TitleEnd_Invalid] = "invalid";
         mapper[TitleEnd_Continue] = "continue";
         mapper[TitleEnd_Stop] = "stop";
     }
@@ -1808,6 +1661,16 @@ void MediaPlayer::SetTitleEndMode(const MediaPlayer::TitleEndMode mcNewState)
 {
     CALL_IN(QString("mcNewState=%1")
         .arg(CALL_SHOW(ToHumanReadable(mcNewState))));
+
+    // Cannot set it to invalid except for constructor
+    if (mcNewState == TitleEnd_Invalid)
+    {
+        const QString reason = tr("Cannot set title end mode to \"invalid\" "
+            "except in initialization");
+        MessageLogger::Error(CALL_METHOD, reason);
+        CALL_OUT(reason);
+        return;
+    }
 
     // Check if mode changes
     if (mcNewState == m_TitleEndMode)
@@ -2026,11 +1889,14 @@ bool MediaPlayer::RemoveMediaFile(const int mcIndex)
     // Remove index
     m_PlayList_Indices.removeAll(mcIndex);
     m_PlayList_Filename.remove(mcIndex);
+    m_PlayList_FixHDR.remove(mcIndex);
     m_PlayList_Title.remove(mcIndex);
+    m_PlayList_Object.remove(mcIndex);
     m_PlayList_OriginalWidth.remove(mcIndex);
     m_PlayList_OriginalHeight.remove(mcIndex);
     m_PlayList_MinTimeMS.remove(mcIndex);
     m_PlayList_MaxTimeMS.remove(mcIndex);
+    m_PlayList_MaxLuminance.remove(mcIndex);
     m_PlayList_DurationMS.remove(mcIndex);
     m_PlayList_CoverArt.remove(mcIndex);
 
@@ -2049,21 +1915,8 @@ QImage MediaPlayer::GetCurrentFrame() const
 {
     CALL_IN("");
 
-    QVideoSink * video_sink = m_Media -> videoSink();
-    QVideoFrame video_frame = video_sink -> videoFrame();
-    QImage image = video_frame.toImage();
-
-    // We have to do the following shenanigans to work around an issue with
-    // some videos where the video frame, when saved as a file, will be much
-    // brighter than the original video. Copying the frame into a new picture
-    // seems to fix this.
-    QImage destination_image(image.width(), image.height(),
-        QImage::Format_RGB32);
-    QPainter painter(&destination_image);
-    painter.fillRect(0, 0, image.width(), image.height(), Qt::black);
-    painter.drawPixmap(0, 0, image.width(), image.height(),
-        QPixmap::fromImage(image));
+    const QImage image = m_Video -> GetCurrentImage();
 
     CALL_OUT("");
-    return destination_image;
+    return image;
 }
