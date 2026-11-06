@@ -1264,7 +1264,7 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
         Pause();
         m_PlayList_CurrentIndex = mcIndex;
         m_Media -> setSource(QString());
-        m_Video -> SetCurrentImage(QImage());
+        m_Video -> SetCurrentImage();
         setWindowTitle(tr("No media file"));
         CALL_OUT("");
         return true;
@@ -1378,7 +1378,7 @@ bool MediaPlayer::PlayPlayListIndex(const int mcIndex)
     // Media type
     if (m_Media -> hasVideo())
     {
-        m_Video -> SetCurrentImage(QImage());
+        m_Video -> SetCurrentImage();
         m_Video -> SetFixHDR(m_PlayList_FixHDR[mcIndex]);
         m_Video -> SetMaxLuminance(m_PlayList_MaxLuminance[mcIndex]);
     } else if (m_Media -> hasAudio())

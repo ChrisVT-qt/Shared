@@ -2467,6 +2467,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.SM-J500M"] = "Galaxy J5 SM-J500M";
     m_CameraModelMapper["Samsung.SM-J727T"] = "Galaxy J7 Prima SM-J727T";
     m_CameraModelMapper["Samsung.SM-N920T"] = "Galaxy Note 5 SM-N920T";
+    m_CameraModelMapper["Samsung.SM-N976V"] = "Galaxy Note 10 + 5G";
     m_CameraModelMapper["Samsung.SM-N9005"] = "Galaxy Note 3 SM-N9005";
     m_CameraModelMapper["Samsung.SM-N9020"] = "Galaxy Note 3 SM-N9020";
     m_CameraModelMapper["Samsung.SM-S135DL"] = "Galaxy A03s SM-S135DL";

@@ -57,7 +57,7 @@ private slots:
     void FrameChanged(const QVideoFrame & mcrFrame);
 
 public:
-    void SetCurrentImage(const QImage & mcrNewImage);
+    void SetCurrentImage(const QImage & mcrNewImage = QImage());
     QImage GetCurrentImage() const;
 private:
     bool m_CurrentImage_Fixed;
