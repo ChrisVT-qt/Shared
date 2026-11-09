@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef MESSAGELOGGER_H
-#define MESSAGELOGGER_H
+#pragma once
 
 // Qt includes
 #include <QList>
@@ -68,5 +67,3 @@ private:
     // Remember what warning has already been shown
     static QSet < QString > m_NoRepeatTags;
 };
-
-#endif

@@ -1,8 +1,7 @@
 // PixmapWidget.h
 // Class definition file
 
-#ifndef PIXMAPWIDGET_H
-#define PIXMAPWIDGET_H
+#pragma once
 
 // Qt includes
 #include <QWidget>
@@ -44,5 +43,3 @@ protected:
 protected:
     void paintEvent(QPaintEvent * mpEvent);
 };
-
-#endif

@@ -30,8 +30,7 @@
   */
 
 // Just include once
-#ifndef EMAIL_H
-#define EMAIL_H
+#pragma once
 
 // Qt includes
 #include <QByteArray>
@@ -1069,5 +1068,3 @@ public:
     // Show everything
     void Dump();
 };
-
-#endif

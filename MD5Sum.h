@@ -2,8 +2,7 @@
 // Class definition file
 
 // Just include once
-#ifndef MD5SUM_H
-#define MD5SUM_H
+#pragma once
 
 // Qt includes
 #include <QByteArray>
@@ -36,6 +35,3 @@ private:
     static QHash < qint64, QHash < QString, QString > >
         m_FilesizeToFilenameToMD5Sum;
 };
-
-#endif
-

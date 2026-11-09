@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef XMLHELPER_H
-#define XMLHELPER_H
+#pragma once
 
 // Qt includes
 #include <QDomElement>
@@ -133,5 +132,3 @@ public:
     // Get known HTML tags
     static QSet < QString > GetKnownHTMLTags();
 };
-
-#endif

@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef MEDIAHELPER_H
-#define MEDIAHELPER_H
+#pragma once
 
 // Qt includes
 #include <QObject>
@@ -89,4 +88,3 @@ public:
     // Calculate brightness of a picture
     static double CalculateBrightness(const QImage & mcrPicture);
 };
-#endif

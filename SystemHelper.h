@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef SYSTEMHELPER_H
-#define SYSTEMHELPER_H
+#pragma once
 
 // Qt includes
 #include <QHash>
@@ -58,5 +57,3 @@ public:
       */
     static bool IsDarkMode();
 };
-
-#endif

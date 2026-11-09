@@ -1,8 +1,7 @@
 // MediaPlayer.h
 // Class definition file
 
-#ifndef MEDIAPLAYER_H
-#define MEDIAPLAYER_H
+#pragma once
 
 // Qt includes
 #include <QAudioOutput>
@@ -237,5 +236,3 @@ public:
     // Get current frame as an image
     QImage GetCurrentFrame() const;
 };
-
-#endif

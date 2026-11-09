@@ -2,8 +2,7 @@
 // Class definition file
 
 // Just include once
-#ifndef GEOCODE_H
-#define GEOCODE_H
+#pragma once
 
 // Qt includes
 #include <QNetworkAccessManager>
@@ -55,6 +54,3 @@ public:
     static QHash < GeoInformationType, QString > GetGeoInformation(
         const double mcLongitude, const double mcLatitude);
 };
-
-#endif
-

@@ -5,8 +5,7 @@
   * \todo Add Doxygen information
   */
 
-#ifndef NAVIGATEDTEXTFILE_H
-#define NAVIGATEDTEXTFILE_H
+#pragma once
 
 // Qt includes
 #include <QList>
@@ -70,6 +69,3 @@ private:
 public:
     void Dump() const;
 };
-
-#endif
-

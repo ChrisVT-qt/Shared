@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef STRINGHELPER_H
-#define STRINGHELPER_H
+#pragma once
 
 // Qt includes
 #include <QDateTime>
@@ -290,5 +289,3 @@ public:
     static const QString ANSI_Bold;
     static const QString ANSI_ResetStyle;
 };
-
-#endif

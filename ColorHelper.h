@@ -4,8 +4,7 @@
   * Home of convenience functions simplying working with colors
   */
 
-#ifndef COLORHELPER_H
-#define COLORHELPER_H
+#pragma once
 
 // Qt includes
 #include <QColor>
@@ -34,5 +33,3 @@ namespace ColorHelper
       */
     QColor FromHTML(const QString & mcrHTMLColor);
 }
-
-#endif

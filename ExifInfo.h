@@ -2,8 +2,7 @@
 // Class definition file
 
 // Avoid duplicate includes
-#ifndef EXIFINFO_H
-#define EXIFINFO_H
+#pragma once
 
 // Qt includes
 #include <QHash>
@@ -216,6 +215,3 @@ public:
     // Dump new values for mappers
     static void Dump_NewMapperValues();
 };
-
-#endif
-

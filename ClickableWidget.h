@@ -9,8 +9,7 @@
   */
 
 // Just include once
-#ifndef CLICKABLEWIDGET_H
-#define CLICKABLEWIDGET_H
+#pragma once
 
 // Qt includes
 #include <QDragEnterEvent>
@@ -149,6 +148,3 @@ public:
       */
     void SetSelected(const bool mcSelectedState);
 };
-
-#endif
-

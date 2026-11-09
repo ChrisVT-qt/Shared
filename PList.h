@@ -5,8 +5,7 @@
   * \todo Add Doxygen information
   */
 
-#ifndef PLIST_H
-#define PLIST_H
+#pragma once
 
 // Qt includes
 #include <QObject>
@@ -80,6 +79,3 @@ private:
     static int m_RootObject;
     static int m_OffsetTableStart;
 };
-
-#endif
-

@@ -1,8 +1,7 @@
 // Timezones.h
 // Class definition
 
-#ifndef TIMEZONES_H
-#define TIMEZONES_H
+#pragma once
 
 // Qt includes
 #include <QDateTime>
@@ -68,6 +67,4 @@ public:
     QDateTime ConvertGMTToTimezone(const QDateTime mcDateTimeGMT,
         QString mcOffsetToGMT);
 };
-
-#endif
 

@@ -33,8 +33,7 @@
   * Deploy.h
   */
 
-#ifndef CALLTRACER_H
-#define CALLTRACER_H
+#pragma once
 
 // Qt includes
 #include <QColor>
@@ -613,5 +612,3 @@ public:
       */
     static QString Show(const void * mcpValue);
 };
-
-#endif

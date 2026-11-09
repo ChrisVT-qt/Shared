@@ -6,8 +6,7 @@
   */
 
 // Just include once
-#ifndef CLICKABLELABEL_H
-#define CLICKABLELABEL_H
+#pragma once
 
 // Qt includes
 #include <QLabel>
@@ -86,6 +85,3 @@ signals:
       */
     void DroppedURIs(const QMimeData * mcpMIMEData);
 };
-
-#endif
-
