@@ -2386,6 +2386,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Panasonic.DMC-LZ6"] = "Lumix DMC-LZ 6";
     m_CameraModelMapper["Panasonic.DMC-LZ8"] = "Lumix DMC-LZ 8";
     m_CameraModelMapper["Panasonic.DMC-TS1"] = "Lumix DMC-TS 1";
+    m_CameraModelMapper["Panasonic.DMC-TZ2"] = "Lumix DMC-TZ 2";
     m_CameraModelMapper["Panasonic.DMC-TZ3"] = "Lumix DMC-TZ 3";
     m_CameraModelMapper["Panasonic.DMC-TZ5"] = "Lumix DMC-TZ 5";
     m_CameraModelMapper["Panasonic.DMC-TZ10"] = "Lumix DMC-TZ 10";
@@ -2421,6 +2422,7 @@ void ExifInfo::Init_CameraModelMapper()
     m_CameraModelMapper["Samsung.Galaxy S24 Ultra"] = "Galaxy S24 Ultra";
     m_CameraModelMapper["Samsung.Galaxy S25 FE"] = "Galaxy S25 FE";
     m_CameraModelMapper["Samsung.Galaxy S25 Ultra"] = "Galaxy S25 Ultra";
+    m_CameraModelMapper["Samsung.Galaxy S26 Ultra"] = "Galaxy S26 Ultra";
     m_CameraModelMapper["Samsung.GT-I9100"] = "Galaxy S II GT-I9100";
     m_CameraModelMapper["Samsung.GT-I9295"] = "Galaxy S IV Active GT-I9295";
     m_CameraModelMapper["Samsung.GT-I9300"] = "Galaxy S III GT-I9300";
@@ -2609,6 +2611,8 @@ void ExifInfo::Init_LensModelMapper()
     m_LensModelMapper[".200.0-400.0 mm f/4.0"] = "200-400mm f/4.0";
     m_LensModelMapper[".250.0-560.0 mm f/5.6"] = "250-560mm f/5.6";
     m_LensModelMapper[".600.0 mm f/4.0"] = "600mm f/4";
+    m_LensModelMapper[".Galaxy S26 Ultra Wide-angle lens 6.500mm f/1.40"]
+        = "Samsung Galaxy S26 Ultra Wide-angle Lens 6.5mm f/1.40";
 
     // Apple
     m_LensModelMapper["Apple.iPad back camera 4.28mm f/2.4"] =

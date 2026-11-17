@@ -2,11 +2,11 @@
 // Class implementation file
 
 // Project includes
+#include "Application.h"
 #include "CallTracer.h"
 #include "ClickableWidget.h"
 #include "MediaPlayer.h"
 #include "MessageLogger.h"
-#include "Preferences.h"
 #include "StringHelper.h"
 #include "VideoWidget.h"
 
@@ -68,21 +68,6 @@ MediaPlayer::MediaPlayer()
 
     // Turn off FFmpeg sending lots of debug information to the console window
     QLoggingCategory::setFilterRules("qt.multimedia.*=false");
-
-    // Make sure we have a place to store dragged files
-    Preferences * p = Preferences::Instance();
-    const QString attachment_dir =
-        p -> GetValue("Attachments:Storage:Directory");
-    const QString database = p -> GetValue("Database:Name");
-    const QString drag_directory =
-        QString("%1/%2/drag/")
-            .arg(attachment_dir,
-                 database);
-    QDir dir("/");
-    if (!dir.exists(drag_directory))
-    {
-        dir.mkpath(drag_directory);
-    }
 
     // Index counter
     m_PlayList_NextIndex = 0;
@@ -368,11 +353,10 @@ void MediaPlayer::StartDragFrame()
     // Pause media replay
     Pause();
 
+    // Generate MIME data
+    QMimeData * mime_data = new QMimeData;
+
     // Filename
-    Preferences * p = Preferences::Instance();
-    const QString attachment_dir =
-        p -> GetValue("Attachments:Storage:Directory");
-    const QString database = p -> GetValue("Database:Name");
     const QString source = m_Media -> source().fileName();
     static const QRegularExpression format_extension("^(.*)\\.([^\\.]+)$");
     const QRegularExpressionMatch match_extension =
@@ -387,24 +371,26 @@ void MediaPlayer::StartDragFrame()
     }
     const qint64 pos = m_Media -> position();
     const QString filename =
-        QString("%1/%2/drag/%3 (frame at %4.%5s).png")
-            .arg(attachment_dir,
-                 database,
+        QString("%1/%2 (frame at %3.%4s).png")
+            .arg(QDir::tempPath(),
                  basename,
                  QString::number(pos/1000),
                  QString("00" + QString::number(pos % 1000)).right(3));
 
-    // Save frame to file
-    QImage frame = GetCurrentFrame();
-    frame.save(filename, "png");
-
-    QDrag * drag = new QDrag(this);
-    QMimeData * mime_data = new QMimeData;
-    QList < QUrl> urls;
-    urls << QUrl(filename);
+    // Filename
+    const QList < QUrl> urls({QUrl(filename)});
     mime_data -> setUrls(urls);
+
+    // Current video frame
+    QImage frame = GetCurrentFrame();
+    frame.save(filename);
+    Application::DeleteFileOnQuit(filename);
+
+    // Create drag
+    QDrag * drag = new QDrag(this);
     drag -> setMimeData(mime_data);
 
+    // Image while dragging
     if (frame.width() > DRAG_PIXMAP_SIZE ||
         frame.height() > DRAG_PIXMAP_SIZE)
     {
@@ -414,6 +400,7 @@ void MediaPlayer::StartDragFrame()
     drag -> setPixmap(QPixmap::fromImage(frame));
     drag -> setHotSpot(QPoint(frame.width()/2, frame.height()/2));
 
+    // Start drag operation
     drag -> exec(Qt::CopyAction | Qt::MoveAction);
 
     CALL_OUT("");
@@ -1915,8 +1902,23 @@ QImage MediaPlayer::GetCurrentFrame() const
 {
     CALL_IN("");
 
-    const QImage image = m_Video -> GetCurrentImage();
+    QImage image = m_Video -> GetCurrentImage();
 
+    // Somewhat of a bug: For certain videos, the frame will have a bogus
+    // alpha channel. This seems to appear for P010
+
+    // Un-premultiply
+#if 0
+    image = image.convertToFormat(QImage::Format_ARGB32);
+    QImage fixed_image(image.size(), QImage::Format_RGB32);
+    fixed_image.fill(Qt::black);
+    QPainter p(&fixed_image);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.drawImage(0, 0, image);
+
+    CALL_OUT("");
+    return fixed_image;
+#endif
     CALL_OUT("");
     return image;
 }
