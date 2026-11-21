@@ -2679,6 +2679,8 @@ void ExifInfo::Init_LensModelMapper()
         "Apple iPhone 16e Back Camera 4.2mm f/1.64";
     m_LensModelMapper["Apple.iPhone 16e front camera 2.69mm f/1.9"] =
         "Apple iPhone 16e Front Camera 2.69mm f/1.9";
+    m_LensModelMapper["Apple.iPhone 16e front TrueDepth camera 2.69mm f/1.9"] =
+        "Apple.iPhone 16e Front TrueDepth Camera 2.69mm f/1.9";
     m_LensModelMapper
         ["Apple.iPhone 16 Pro Max back triple camera 6.765mm f/1.78"] =
         "Apple iPhone 16 Pro Max Back Triple Camera 6.765mm f/1.78";
